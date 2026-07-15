@@ -1,0 +1,2677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GLORY BOT PRO</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap');
+
+  :root {
+    --bg: #090b10;
+    --bg2: #0d1117;
+    --bg3: #111827;
+    --card: #111827;
+    --card2: #1a2235;
+    --border: #1e2d45;
+    --blue: #3b82f6;
+    --blue2: #60a5fa;
+    --orange: #f97316;
+    --orange2: #fb923c;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--blue); border-radius: 3px; }
+
+  input, select, textarea {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg2);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    width: 100%;
+    outline: none;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus { border-color: var(--blue); }
+  input::placeholder, textarea::placeholder { color: var(--text3); }
+  select option { background: var(--bg2); }
+  textarea { resize: vertical; }
+
+  button { cursor: pointer; font-family: 'Inter', sans-serif; border: none; outline: none; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ════════════════ LANDING ════════════════ */
+  #landing {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #090b10 0%, #0d1117 100%);
+  }
+
+  .land-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+    background: rgba(13,17,23,.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+
+  .land-logo { display: flex; align-items: center; gap: 10px; }
+  .land-logo-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg,#1e3a5f,#0d1117);
+    border: 1.5px solid var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: var(--blue);
+    font-family: 'Orbitron', sans-serif;
+  }
+  .land-logo-text { font-size: 18px; font-weight: 800; }
+  .land-logo-text span { color: var(--orange); }
+
+  .land-hero {
+    padding: 40px 24px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .land-hero::before {
+    content:''; position:absolute; top:-60px; left:50%; transform:translateX(-50%);
+    width:400px; height:400px; border-radius:50%;
+    background: radial-gradient(circle, #1e3a5f44 0%, transparent 70%);
+    pointer-events:none;
+  }
+
+  .trust-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.3);
+    border-radius: 99px; padding: 6px 16px;
+    font-size: 12px; font-weight: 600; color: var(--blue2);
+    margin-bottom: 24px; letter-spacing: .5px;
+  }
+  .trust-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.6;transform:scale(1.3)} }
+
+  .hero-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 40px; font-weight: 900; line-height: 1;
+    margin-bottom: 6px; letter-spacing: -1px;
+  }
+  .hero-title .glory { color: var(--orange); }
+  .hero-sub { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+  .hero-sub .accent { color: var(--orange); }
+  .hero-desc { color: var(--text2); font-size: 14px; line-height: 1.6; margin-bottom: 28px; }
+
+  .hero-btns { display: flex; flex-direction: column; gap: 12px; }
+  .btn-primary {
+    background: var(--blue);
+    color: #fff; border-radius: 14px; padding: 16px 24px;
+    font-size: 16px; font-weight: 700; letter-spacing: .3px;
+    transition: all .2s; box-shadow: 0 4px 24px rgba(59,130,246,.35);
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:hover { background: var(--blue2); transform: translateY(-1px); }
+  .btn-secondary {
+    background: rgba(255,255,255,.06); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 14px;
+    padding: 15px 24px; font-size: 16px; font-weight: 600;
+    transition: all .2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,.1); }
+
+  .stats-row {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px; margin: 32px 24px;
+  }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px 10px; text-align: center;
+  }
+  .stat-icon { font-size: 20px; margin-bottom: 6px; color: var(--orange); }
+  .stat-val { font-size: 22px; font-weight: 900; color: var(--orange); }
+  .stat-label { font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-top: 3px; }
+
+  .section-label { text-align: center; font-size: 11px; letter-spacing: 3px; color: var(--blue); font-weight: 700; text-transform: uppercase; margin-bottom: 10px; }
+  .section-title { text-align: center; font-size: 26px; font-weight: 800; margin-bottom: 6px; }
+  .section-title .accent { color: var(--blue); }
+  .section-title .accent-o { color: var(--orange); }
+  .section-sub { text-align: center; color: var(--text2); font-size: 13px; margin-bottom: 24px; }
+
+  .features-grid { padding: 0 20px 32px; display: flex; flex-direction: column; gap: 12px; }
+  .feat-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px;
+    transition: border-color .2s;
+  }
+  .feat-card:hover { border-color: var(--blue); }
+  .feat-icon-wrap {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 12px;
+  }
+  .feat-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .feat-card p { color: var(--text2); font-size: 13px; line-height: 1.5; }
+
+  .steps-grid { padding: 0 20px 32px; display: flex; flex-direction: column; gap: 12px; }
+  .step-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 20px; text-align: center;
+    position: relative;
+  }
+  .step-num {
+    position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    background: var(--orange); color: #fff; font-weight: 900; font-size: 13px;
+    width: 24px; height: 24px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-icon-wrap {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(30,58,95,.5); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin: 16px auto 14px;
+  }
+  .step-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .step-card p { color: var(--text2); font-size: 13px; line-height: 1.5; }
+
+  .servers-section { padding: 0 20px 32px; }
+  .servers-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .server-chip {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 10px 8px;
+    text-align: center; font-size: 12px; font-weight: 600; color: var(--text2);
+  }
+
+  .land-footer {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    padding: 24px 20px; text-align: center;
+  }
+  .support-row { display: flex; gap: 10px; margin-bottom: 16px; }
+  .support-btn {
+    flex: 1; border-radius: 12px; padding: 12px;
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none; border: 1px solid var(--border);
+    background: var(--card); transition: all .2s;
+  }
+  .support-btn:hover { border-color: var(--blue); }
+  .support-btn .s-icon { font-size: 22px; }
+  .support-btn .s-name { font-size: 11px; font-weight: 700; }
+  .support-btn .s-handle { font-size: 11px; color: var(--text2); }
+
+  /* ════════════════ AUTH ════════════════ */
+  #auth, #adminlogin {
+    min-height: 100vh;
+    position: relative;
+    background: transparent;
+    display: none; flex-direction: column;
+  }
+  #auth.active, #adminlogin.active { display: flex; }
+  
+  .auth-video-bg {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; z-index: -1;
+    filter: brightness(0.35); /* वीडियो थोड़ा डार्क रहेगा ताकि टेक्स्ट साफ़ पढ़ा जा सके */
+  }
+
+  .auth-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+    background: rgba(13,17,23,0.6); backdrop-filter: blur(12px);
+  }
+  .auth-logo-box {
+    width: 42px; height: 42px; border-radius: 11px;
+    background: linear-gradient(135deg,#1e3a5f,#0d1117);
+    border: 1.5px solid var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; color: var(--blue);
+    font-family: 'Orbitron', sans-serif;
+  }
+  .auth-brand { font-size: 20px; font-weight: 800; }
+  .auth-brand span { color: var(--orange); }
+
+  .auth-body { 
+    flex: 1; padding: 32px 24px; max-width: 420px; margin: 40px auto; width: 100%;
+    background: rgba(13, 17, 23, 0.55); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  }
+  .auth-welcome-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(59,130,246,.15); border: 1px solid rgba(59,130,246,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; margin-bottom: 14px;
+  }
+  .auth-title { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+  .auth-title span { color: var(--orange); }
+  .auth-subtitle { color: var(--text2); font-size: 13px; margin-bottom: 28px; }
+
+  .field-group { margin-bottom: 16px; }
+  .field-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 600; margin-bottom: 8px;
+    color: var(--blue2);
+  }
+  .field-row { position: relative; }
+  .field-row .field-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; }
+  .field-row input { padding-left: 40px; }
+  .field-row .pass-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    cursor: pointer; font-size: 16px; color: var(--text3);
+  }
+  .field-row .forgot { position: absolute; right: 0; top: -28px; font-size: 12px; color: var(--blue); cursor: pointer; font-weight: 600; }
+
+  .btn-login {
+    width: 100%; background: var(--blue); color: #fff;
+    border-radius: 14px; padding: 15px 24px;
+    font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(59,130,246,.4);
+    transition: all .2s; margin-top: 6px;
+  }
+  .btn-login:hover { background: var(--blue2); }
+  .btn-login.orange { background: var(--orange); box-shadow: 0 4px 20px rgba(249,115,22,.4); }
+  .btn-login.orange:hover { background: var(--orange2); }
+
+  .auth-switch { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text2); }
+  .auth-switch a { color: var(--blue); font-weight: 700; cursor: pointer; }
+
+  .auth-tabs {
+    display: flex; background: var(--bg3);
+    border-radius: 12px; padding: 4px; margin-bottom: 24px;
+  }
+  .auth-tab {
+    flex: 1; padding: 9px; border-radius: 9px; font-size: 13px; font-weight: 700;
+    background: transparent; color: var(--text3); transition: all .2s;
+  }
+  .auth-tab.active { background: var(--blue); color: #fff; }
+
+  /* ════════════════ USER DASHBOARD ════════════════ */
+  #userdash { min-height: 100vh; background: var(--bg); padding-bottom: 100px; }
+
+  .dash-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    background: rgba(9,11,16,.95); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .dash-logo { display: flex; align-items: center; gap: 8px; }
+  .dash-logo-txt { font-size: 16px; font-weight: 800; }
+  .dash-logo-txt span { color: var(--orange); }
+  .live-dot { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--green); }
+  .live-dot::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--green); animation:pulse 1.4s infinite; }
+  .nav-actions { display: flex; align-items: center; gap: 10px; }
+  .nav-icon-btn {
+    width: 34px; height: 34px; border-radius: 9px;
+    background: var(--card); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; transition: all .2s;
+  }
+  .nav-icon-btn:hover { border-color: var(--blue); }
+
+  .user-info-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 14px 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 16px;
+  }
+  .user-ident { display: flex; align-items: center; gap: 10px; }
+  .user-avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), #1e3a5f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff;
+  }
+  .user-name-text { font-size: 14px; font-weight: 700; }
+  .user-role { font-size: 11px; color: var(--text3); }
+  .credits-pill {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3);
+    border-radius: 99px; padding: 6px 14px;
+    font-size: 13px; font-weight: 700; color: var(--blue2);
+  }
+
+  .server-select-bar {
+    margin: 0 16px 14px;
+    background: var(--card); border: 1.5px solid var(--blue);
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; font-weight: 600;
+  }
+  .server-select-bar select { background: transparent; border: none; color: var(--text); font-weight: 600; font-size: 14px; padding: 0; width: auto; flex: 1; }
+
+  .maintenance-bar {
+    margin: 0 16px 14px;
+    background: rgba(249,115,22,.1); border: 1px solid rgba(249,115,22,.35);
+    border-radius: 12px; padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600; color: var(--orange);
+  }
+
+  .announce-bar {
+    margin: 0 16px 14px;
+    background: rgba(168,85,247,.08); border: 1px solid rgba(168,85,247,.3);
+    border-radius: 12px; padding: 10px 16px; overflow: hidden;
+    font-size: 12px; color: var(--purple); font-weight: 600;
+  }
+  .marquee-inner { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; }
+  @keyframes marquee { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  .section-heading {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 16px; margin-bottom: 10px;
+    font-size: 15px; font-weight: 700;
+  }
+  .section-heading .h-icon { font-size: 18px; }
+
+  /* Buy Credits */
+  .credits-scroll { padding: 0 16px 4px; display: flex; flex-direction: column; gap: 10px; }
+  .credit-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer; transition: all .2s;
+    position: relative; overflow: hidden;
+  }
+  .credit-card:hover, .credit-card.best { border-color: var(--orange); }
+  .credit-card.best { background: linear-gradient(135deg, rgba(249,115,22,.08), var(--card)); }
+  .best-tag {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--orange); color: #fff; font-size: 9px; font-weight: 900;
+    padding: 2px 8px; border-radius: 99px; letter-spacing: 1px;
+  }
+  .cc-left { display: flex; align-items: center; gap: 12px; }
+  .cc-icon {
+    width: 42px; height: 42px; border-radius: 11px;
+    background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.3);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .cc-name { font-size: 15px; font-weight: 800; }
+  .cc-desc { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .cc-right { text-align: right; }
+  .cc-price { font-size: 20px; font-weight: 900; color: var(--orange); }
+  .cc-buy { font-size: 10px; color: var(--blue2); margin-top: 2px; }
+
+  /* Bot launch */
+  .launch-card {
+    margin: 0 16px 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px; 
+  }
+  .launch-fields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 14px; }
+  .launch-field label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; }
+
+  .btn-launch {
+    width: 100%; background: linear-gradient(90deg, var(--blue), #2563eb);
+    color: #fff; border-radius: 13px; padding: 14px;
+    font-size: 15px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 4px 20px rgba(59,130,246,.4); transition: all .2s;
+  }
+  .btn-launch:hover { box-shadow: 0 6px 28px rgba(59,130,246,.5); }
+
+  /* Active Bot Card */
+  .bot-card {
+    margin: 0 16px 14px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 18px;
+    position: relative; overflow: hidden;
+  }
+  .bot-card::before {
+    content:''; position:absolute; top:0;left:0;right:0; height:2px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+  }
+  .bot-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .bot-guild-logo {
+    width: 52px; height: 52px; border-radius: 13px;
+    background: linear-gradient(135deg, #1e3a5f, #0d1117);
+    border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+  }
+  .bot-guild-name { font-size: 16px; font-weight: 800; }
+  .bot-guild-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .bot-guild-server { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .status-badge {
+    margin-left: auto; padding: 4px 12px; border-radius: 99px;
+    font-size: 11px; font-weight: 700; letter-spacing: .5px;
+  }
+  .status-badge.live { background: rgba(34,197,94,.15); color: var(--green); border: 1px solid rgba(34,197,94,.4); }
+  .status-badge.offline { background: rgba(249,115,22,.15); color: var(--orange); border: 1px solid rgba(249,115,22,.4); }
+  .status-badge.expired { background: rgba(239,68,68,.15); color: var(--red); border: 1px solid rgba(239,68,68,.4); }
+
+  .bot-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .bot-stat {
+    background: var(--bg2); border-radius: 12px; padding: 12px;
+  }
+  .bs-label { font-size: 9px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
+  .bs-val { font-size: 20px; font-weight: 900; }
+  .bs-val.glory { color: var(--orange); }
+  .bs-val.score { color: var(--green); }
+
+  .goal-section { margin-bottom: 16px; }
+  .goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 12px; font-weight: 600; }
+  .goal-label { display: flex; align-items: center; gap: 6px; color: var(--text2); }
+  .goal-pct { color: var(--purple); font-weight: 800; }
+  .goal-bar { background: rgba(255,255,255,.07); border-radius: 99px; height: 10px; overflow: hidden; }
+  .goal-fill {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--blue), var(--green));
+    transition: width .5s; position: relative;
+  }
+  .goal-fill::after {
+    content:''; position:absolute; right:-1px; top:0; bottom:0;
+    width:10px; background: #fff; border-radius:50%;
+    box-shadow: 0 0 8px var(--green);
+  }
+  .goal-target { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  .bot-actions { display: flex; gap: 10px; }
+  .btn-restart {
+    flex: 1; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.3);
+    color: var(--blue2); border-radius: 11px; padding: 10px;
+    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-restart:hover { background: rgba(59,130,246,.25); }
+  .btn-delete-bot {
+    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+    color: var(--red); border-radius: 11px; padding: 10px 16px;
+    font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-delete-bot:hover { background: rgba(239,68,68,.2); }
+
+  /* History */
+  .history-section { margin: 0 16px; }
+  .history-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .hist-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.2);
+    display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  }
+  .hist-name { font-size: 14px; font-weight: 600; }
+  .hist-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .hist-status { margin-left: auto; }
+  .hist-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+  }
+  .hist-badge.success { background: rgba(34,197,94,.15); color: var(--green); }
+  .hist-badge.pending { background: rgba(249,115,22,.15); color: var(--orange); }
+  .hist-badge.failed { background: rgba(239,68,68,.15); color: var(--red); }
+
+  /* BOTTOM NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+    padding: 10px 20px 20px;
+  }
+  .bottom-nav-inner {
+    background: rgba(17,24,39,.96); backdrop-filter: blur(16px);
+    border: 1px solid var(--border); border-radius: 20px;
+    padding: 8px 16px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; padding: 6px 12px; border-radius: 12px; transition: all .2s;
+    font-size: 10px; font-weight: 700; color: var(--text3);
+  }
+  .nav-item .nav-i { font-size: 20px; }
+  .nav-item.active { color: var(--orange); }
+  .nav-item.home-btn {
+    width: 52px; height: 52px; border-radius: 15px;
+    background: linear-gradient(135deg,#1e3a5f,#0d1117);
+    border: 2px solid var(--blue); font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(59,130,246,.4); padding: 0;
+  }
+
+  /* Coupon row */
+  .coupon-row {
+    margin: 0 16px 14px; display: flex; gap: 10px;
+  }
+  .coupon-row input { border-radius: 11px; }
+  .btn-redeem {
+    background: var(--orange); color: #fff;
+    border-radius: 11px; padding: 0 18px;
+    font-size: 13px; font-weight: 700; white-space: nowrap;
+    transition: all .2s; flex-shrink: 0;
+  }
+  .btn-redeem:hover { background: var(--orange2); }
+
+  /* Settings sheet */
+  .settings-sheet {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,.7); display: none; align-items: flex-end;
+  }
+  .settings-sheet.open { display: flex; }
+  .settings-inner {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px; width: 100%; max-width: 480px; margin: 0 auto;
+    border-top: 1px solid var(--border);
+  }
+  .sheet-drag { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 0 auto 20px; }
+  .sheet-title { font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
+  .settings-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .settings-row:last-child { border-bottom: none; }
+  .sr-label { font-size: 13px; color: var(--text2); }
+  .sr-val { font-size: 13px; font-weight: 600; font-family: monospace; }
+
+  /* ════════════════ ADMIN PANEL ════════════════ */
+  #adminpanel { min-height: 100vh; background: var(--bg); padding-bottom: 100px; }
+
+  .admin-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 18px;
+    background: linear-gradient(90deg, rgba(30,58,95,.4), rgba(9,11,16,.95));
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(59,130,246,.3);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .admin-brand { font-size: 15px; font-weight: 800; }
+  .admin-brand span { color: var(--orange); }
+  .admin-badge { background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.3); color: var(--orange); font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 99px; letter-spacing: 1px; }
+
+  .admin-stats {
+    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px; padding: 14px 16px;
+  }
+  .admin-stat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 8px; text-align: center;
+  }
+  .admin-stat-val { font-size: 20px; font-weight: 900; }
+  .admin-stat-label { font-size: 9px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+
+  .admin-tabs {
+    display: flex; overflow-x: auto; gap: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 0 10px; -webkit-overflow-scrolling: touch;
+  }
+  .admin-tabs::-webkit-scrollbar { display: none; }
+  .admin-tab {
+    padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--text3);
+    white-space: nowrap; background: transparent;
+    border-bottom: 2px solid transparent; transition: all .2s;
+  }
+  .admin-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+  .admin-content { padding: 14px 16px; }
+
+  /* Order cards */
+  .order-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  }
+  .order-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .order-user { font-size: 14px; font-weight: 700; }
+  .order-meta { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .order-utr { font-size: 11px; color: var(--blue2); margin-top: 2px; font-family: monospace; }
+  .order-actions { display: flex; gap: 8px; }
+  .btn-approve {
+    background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4);
+    color: var(--green); border-radius: 9px; padding: 7px 14px;
+    font-size: 12px; font-weight: 700; transition: all .2s;
+  }
+  .btn-approve:hover { background: rgba(34,197,94,.3); }
+  .btn-reject {
+    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+    color: var(--red); border-radius: 9px; padding: 7px 14px;
+    font-size: 12px; font-weight: 700; transition: all .2s;
+  }
+  .btn-reject:hover { background: rgba(239,68,68,.2); }
+
+  /* User management */
+  .user-mgmt-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  }
+  .um-top { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .um-avatar {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--blue), #1e3a5f);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .um-name { font-size: 14px; font-weight: 700; }
+  .um-email { font-size: 11px; color: var(--text3); }
+  .um-credits { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--blue2); }
+  .um-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .um-btn {
+    padding: 6px 12px; border-radius: 8px; font-size: 11px; font-weight: 700;
+    border: 1px solid; transition: all .2s;
+  }
+  .um-btn.add { border-color: rgba(34,197,94,.4); color: var(--green); background: rgba(34,197,94,.1); }
+  .um-btn.remove { border-color: rgba(239,68,68,.4); color: var(--red); background: rgba(239,68,68,.1); }
+  .um-btn.ban { border-color: rgba(249,115,22,.4); color: var(--orange); background: rgba(249,115,22,.1); }
+  .um-btn.promote { border-color: rgba(168,85,247,.4); color: var(--purple); background: rgba(168,85,247,.1); }
+  .um-btn.role { border-color: rgba(59,130,246,.4); color: var(--blue); background: rgba(59,130,246,.1); }
+
+  /* Bot editor */
+  .bot-editor-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 14px; margin-bottom: 10px;
+  }
+  .be-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .be-logo { width: 44px; height: 44px; border-radius: 11px; background: var(--bg2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .be-name { font-size: 15px; font-weight: 700; }
+  .be-owner { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .be-form { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .be-form .full { grid-column: 1/-1; }
+  .be-field label { font-size: 10px; color: var(--text3); letter-spacing: 1px; display: block; margin-bottom: 4px; }
+  .be-field input, .be-field select { padding: 8px 12px; font-size: 13px; border-radius: 9px; }
+  .btn-save {
+    width: 100%; background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.4);
+    color: var(--green); border-radius: 11px; padding: 12px;
+    font-size: 14px; font-weight: 700; margin-top: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: all .2s;
+  }
+  .btn-save:hover { background: rgba(34,197,94,.3); }
+
+  /* Coupons */
+  .coupon-gen {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin-bottom: 14px;
+  }
+  .coupon-gen-fields { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: end; margin-bottom: 10px; }
+  .btn-gen {
+    background: var(--blue); color: #fff; border-radius: 11px;
+    padding: 11px 16px; font-size: 13px; font-weight: 700;
+    white-space: nowrap; transition: all .2s;
+  }
+  .btn-gen:hover { background: var(--blue2); }
+  .coupon-list-item {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .coupon-code { font-family: monospace; font-size: 15px; font-weight: 800; color: var(--blue2); letter-spacing: 2px; }
+  .coupon-credits { font-size: 12px; color: var(--green); margin-top: 2px; }
+  .btn-delete-coupon {
+    background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3);
+    color: var(--red); border-radius: 8px; padding: 6px 12px;
+    font-size: 12px; font-weight: 700; transition: all .2s;
+  }
+
+  /* Broadcast */
+  .broadcast-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px;
+  }
+  .btn-broadcast {
+    width: 100%; background: var(--purple); color: #fff;
+    border-radius: 12px; padding: 13px;
+    font-size: 14px; font-weight: 700; margin-top: 10px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    transition: all .2s;
+  }
+  .btn-broadcast:hover { background: #9333ea; }
+
+  /* Create Credit */
+  .create-credit-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 16px; margin-bottom: 14px;
+  }
+  .cc-form { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .cc-form .span2 { grid-column: span 2; }
+  .cc-form label { font-size: 10px; color: var(--text3); display: block; margin-bottom: 4px; letter-spacing: 1px; }
+  .cc-form input { padding: 9px 12px; font-size: 13px; border-radius: 9px; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 300;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal-box {
+    background: var(--card); border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px; width: 100%; max-width: 480px;
+    border-top: 1px solid var(--border);
+    animation: slideUp .25s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-drag { width: 40px; height: 4px; background: var(--border); border-radius: 99px; margin: 0 auto 20px; }
+  .modal-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
+  .modal-subtitle { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+
+  .qr-box {
+    background: #fff; border-radius: 14px; padding: 12px;
+    display: inline-block; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+  }
+  .qr-img { width: 160px; height: 160px; display: block; }
+  .upi-info { text-align: center; margin-bottom: 16px; }
+  .upi-id { font-size: 13px; color: var(--blue2); font-weight: 600; }
+  .upi-amount { font-size: 22px; font-weight: 900; color: var(--orange); }
+
+  .toast {
+    position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 20px;
+    font-size: 13px; font-weight: 600; z-index: 999;
+    display: none; align-items: center; gap: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.4); white-space: nowrap;
+    animation: fadeInDown .25s ease;
+  }
+  .toast.show { display: flex; }
+  @keyframes fadeInDown { from{transform:translate(-50%,-12px);opacity:0} to{transform:translate(-50%,0);opacity:1} }
+  .toast.success { border-color: rgba(34,197,94,.5); color: var(--green); }
+  .toast.error { border-color: rgba(239,68,68,.5); color: var(--red); }
+  .toast.info { border-color: rgba(59,130,246,.5); color: var(--blue2); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); font-size: 14px; }
+  .empty-state .e-icon { font-size: 36px; margin-bottom: 10px; }
+
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .badge-role {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-left: 6px;
+  }
+  .badge-role.admin2 { background: rgba(168,85,247,.2); color: var(--purple); border: 1px solid rgba(168,85,247,.4); }
+  .badge-role.admin { background: rgba(249,115,22,.2); color: var(--orange); border: 1px solid rgba(249,115,22,.4); }
+
+  .credit-input-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .credit-input-row input { width: 70px; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LANDING ═══════════════ -->
+<div id="landing" class="screen active">
+  <nav class="land-nav">
+    <div class="land-logo">
+      <div class="land-logo-icon">⚡</div>
+      <div class="land-logo-text">GLORY <span>BOT</span> PRO</div>
+    </div>
+    <button class="btn-primary" style="padding:8px 18px;font-size:13px;border-radius:10px" onclick="showAuth('login')">Login →</button>
+  </nav>
+
+  <div class="land-hero">
+    <div class="trust-badge"><span class="dot"></span> TRUSTED BY 50K+ PLAYERS</div>
+    <div class="hero-title">GLORY <span class="glory">BOT PRO</span></div>
+    <div style="height:8px"></div>
+    <div class="hero-sub">Push Your Guild to <span class="accent">Top Ranks</span></div>
+    <div class="hero-desc">The most trusted guild glory automation platform. 24/7 fully automated bots — zero manual effort required.</div>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="showAuth('register')">Start Earning Glory →</button>
+      <button class="btn-secondary" onclick="document.getElementById('howit').scrollIntoView({behavior:'smooth'})">How It Works</button>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val">10M+</div><div class="stat-label">Glory Delivered</div></div>
+    <div class="stat-card"><div class="stat-icon">🛡️</div><div class="stat-val">100%</div><div class="stat-label">Account Safe</div></div>
+    <div class="stat-card"><div class="stat-icon">⚡</div><div class="stat-val">24/7</div><div class="stat-label">Bot Uptime</div></div>
+  </div>
+
+  <div style="padding:0 20px 32px">
+    <div class="section-label">FEATURES</div>
+    <div class="section-title">Everything You Need to <span class="accent">Dominate</span></div>
+    <div class="section-sub">Built for Free Fire guild leaders who want results</div>
+  </div>
+  <div class="features-grid">
+    <div class="feat-card"><div class="feat-icon-wrap">🤖</div><h3>Automated Glory</h3><p>Bots join your guild and grind glory non-stop — zero manual effort required.</p></div>
+    <div class="feat-card"><div class="feat-icon-wrap">📊</div><h3>Live Tracking</h3><p>Watch glory climb in real-time from your dashboard with detailed bot stats.</p></div>
+    <div class="feat-card"><div class="feat-icon-wrap" style="background:rgba(34,197,94,.15);border-color:rgba(34,197,94,.3)">🛡️</div><h3>Zero Risk</h3><p>We use separate bot accounts — your main account is never touched.</p></div>
+    <div class="feat-card"><div class="feat-icon-wrap" style="background:rgba(249,115,22,.15);border-color:rgba(249,115,22,.3)">💰</div><h3>Credit System</h3><p>Buy credits, use when ready. Failed sessions get auto-refunded instantly.</p></div>
+  </div>
+
+  <div id="howit" style="padding:0 20px 16px;margin-top:20px">
+    <div class="section-label">HOW IT WORKS</div>
+    <div class="section-title">Glory in <span class="accent-o">4 Steps</span></div>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card"><div class="step-num">1</div><div class="step-icon-wrap">👤</div><h3>Sign Up</h3><p>Create your free account in 30 seconds — just username and password.</p></div>
+    <div class="step-card"><div class="step-num">2</div><div class="step-icon-wrap">💳</div><h3>Add Credits</h3><p>Buy glory credits via UPI. Pick your pack and pay instantly.</p></div>
+    <div class="step-card"><div class="step-num">3</div><div class="step-icon-wrap">🎮</div><h3>Enter Guild ID</h3><p>Copy your Guild ID from FF settings and paste it in the dashboard.</p></div>
+    <div class="step-card"><div class="step-num">4</div><div class="step-icon-wrap">🚀</div><h3>Launch</h3><p>Hit launch — bots auto-join and start earning glory immediately.</p></div>
+  </div>
+
+  <div class="servers-section" style="margin-top:20px">
+    <div class="section-label">PRICING</div>
+    <div class="section-title">Choose Your <span class="accent-o">Glory Pack</span></div>
+    <div class="section-sub">Available across <strong>14 active servers</strong></div>
+    <div class="servers-grid">
+      <div class="server-chip">🇮🇳 India</div><div class="server-chip">🇧🇩 Bangladesh</div><div class="server-chip">🇵🇰 Pakistan</div>
+      <div class="server-chip">🇧🇷 Brazil</div><div class="server-chip">🌍 Middle East</div><div class="server-chip">🌐 NA</div>
+      <div class="server-chip">🇪🇺 Europe</div><div class="server-chip">🇮🇩 Indonesia</div><div class="server-chip">🇷🇺 Russia</div>
+    </div>
+    <div style="margin-top:20px;display:grid;gap:10px" id="landing-price-list">
+      <!-- will be populated from backend -->
+    </div>
+  </div>
+
+  <div class="land-footer" style="margin-top:32px">
+    <div class="support-row">
+      <a class="support-btn" href="https://t.me/ydv_mod" target="_blank">
+        <span class="s-icon">✈️</span><div><div class="s-name" style="color:#29b6f6">TELEGRAM</div><div class="s-handle">@ydv_mod</div></div>
+      </a>
+      <a class="support-btn" href="https://wa.me/917483121631" target="_blank">
+        <span class="s-icon">📱</span><div><div class="s-name" style="color:var(--green)">WHATSAPP</div><div class="s-handle">+91 7483121631</div></div>
+      </a>
+      <a class="support-btn" href="https://t.me/BBYTOP3" target="_blank">
+        <span class="s-icon">✈️</span><div><div class="s-name" style="color:#29b6f6">OWNER</div><div class="s-handle">@BBYTOP3</div></div>
+      </a>
+    </div>
+    <div style="color:var(--text3);font-size:12px">© 2025 GLORY BOT PRO · All rights reserved</div>
+    <div style="margin-top:10px"><a onclick="showScreen('adminlogin')" style="color:var(--text3);font-size:11px;cursor:pointer;text-decoration:underline">👑 Admin Portal Login</a></div>
+  </div>
+</div>
+
+<!-- ═══════════════ AUTH ═══════════════ -->
+<div id="auth" class="screen">
+  <!-- Video Background -->
+  <video autoplay muted loop playsinline class="auth-video-bg">
+    <source src="/video.mp4" type="video/mp4">
+  </video>
+  
+  <div class="auth-header">
+    <div class="auth-logo-box">⚡</div>
+    <div class="auth-brand">GLORY <span>BOT</span> PRO</div>
+  </div>
+  <div class="auth-body">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="auth-welcome-icon">→</div>
+      <div class="auth-title">Welcome <span>Back</span></div>
+      <div class="auth-subtitle">Sign in to continue to your dashboard.</div>
+      <div class="field-group">
+        <div class="field-label">📧 Username</div>
+        <div class="field-row">
+          <input type="text" id="login-user" placeholder="Enter your username" autocomplete="username">
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">🔒 Password <span style="margin-left:auto;color:var(--blue);font-size:12px;cursor:pointer">Forgot?</span></div>
+        <div class="field-row">
+          <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+        </div>
+      </div>
+      <div id="login-error" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none"></div>
+      <button class="btn-login" onclick="doLogin()">→ Login</button>
+      <div class="auth-switch">Don't have an account? <a onclick="switchAuthTab('register')">Register</a></div>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="form-register" style="display:none">
+      <div class="auth-welcome-icon">✨</div>
+      <div class="auth-title">Create <span>Account</span></div>
+      <div class="auth-subtitle">Join thousands of guild leaders winning glory.</div>
+      <div class="field-group">
+        <div class="field-label">📧 Email</div>
+        <div style="display:flex;gap:8px">
+          <input type="email" id="reg-email" placeholder="Enter your email" style="flex:1">
+          <button onclick="requestOTP()" id="btn-send-otp" style="background:var(--blue);color:#fff;border-radius:12px;padding:0 14px;font-size:12px;font-weight:700;white-space:nowrap">Send OTP</button>
+        </div>
+      </div>
+      <div class="field-group">
+        <div class="field-label">🔑 Verification Code</div>
+        <input type="text" id="reg-otp" placeholder="Enter 6-digit OTP">
+      </div>
+      <div class="field-group">
+        <div class="field-label">👤 Username</div>
+        <input type="text" id="reg-user" placeholder="Choose a username">
+      </div>
+      <div class="field-group">
+        <div class="field-label">🔒 Password</div>
+        <input type="password" id="reg-pass" placeholder="Create a password">
+      </div>
+      <div id="reg-error" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none"></div>
+      <div id="reg-success" style="color:var(--green);font-size:13px;font-weight:600;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:12px;margin-bottom:10px;display:none;text-align:center">✅ Account created! Please sign in.</div>
+      <button class="btn-login orange" onclick="doRegister()">🚀 Verify & Create Account</button>
+      <div class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Sign In</a></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ADMIN LOGIN ═══════════════ -->
+<div id="adminlogin" class="screen">
+  <!-- Video Background -->
+  <video autoplay muted loop playsinline class="auth-video-bg">
+    <source src="/video.mp4" type="video/mp4">
+  </video>
+  
+  <div class="auth-header">
+    <div class="auth-logo-box" id="adminlogin-logo-box">👑</div>
+    <div class="auth-brand">GLORY BOT <span>ADMIN</span> PORTAL</div>
+  </div>
+  <div class="auth-body">
+    <div class="auth-welcome-icon">🔐</div>
+    <div class="auth-title">Admin <span>Access</span></div>
+    <div class="auth-subtitle">Restricted area — administrators only.</div>
+    <div class="field-group">
+      <div class="field-label">📧 Admin Username</div>
+      <div class="field-row">
+        <input type="text" id="adminlogin-user" placeholder="Enter admin username" autocomplete="username">
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-label">🔒 Password</div>
+      <div class="field-row">
+        <input type="password" id="adminlogin-pass" placeholder="Enter admin password" autocomplete="current-password">
+      </div>
+    </div>
+    <div id="adminlogin-error" style="color:var(--red);font-size:12px;margin-bottom:10px;display:none"></div>
+    <button class="btn-login" style="background:var(--orange);box-shadow:0 4px 20px rgba(249,115,22,.4)" onclick="doAdminLogin()">👑 Admin Login</button>
+    <div class="auth-switch" style="margin-top:24px"><a onclick="showScreen('landing')">← Back to site</a></div>
+  </div>
+</div>
+
+<!-- ═══════════════ USER DASHBOARD ═══════════════ -->
+<div id="userdash" class="screen">
+  <nav class="dash-nav">
+    <div class="dash-logo">
+      <div class="dash-logo-icon" style="width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1e3a5f,#0d1117);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden">⚡</div>
+      <div class="dash-logo-txt">GLORY <span>BOT</span></div>
+      <div class="live-dot" style="margin-left:6px">LIVE</div>
+    </div>
+    <div class="nav-actions">
+      <div class="nav-icon-btn" onclick="openSettings()">⚙️</div>
+      <div class="nav-icon-btn" onclick="doLogout()">↩️</div>
+    </div>
+  </nav>
+
+  <div class="user-info-bar">
+    <div class="user-ident">
+      <div class="user-avatar" id="u-avatar-letter">A</div>
+      <div>
+        <div class="user-name-text" id="u-display-name">user</div>
+        <div class="user-role" id="u-role-badge">(user)</div>
+      </div>
+    </div>
+    <div class="credits-pill">💳 Credits: <strong id="u-credits-display">0</strong></div>
+  </div>
+
+  <div class="server-select-bar">
+    <span>🌐</span>
+    <span>🇮🇳</span>
+    <select id="u-server">
+      <option value="IND">India ₹</option>
+      <option value="BD">Bangladesh</option>
+      <option value="PK">Pakistan</option>
+      <option value="BR">Brazil</option>
+      <option value="ME">Middle East</option>
+      <option value="ID">Indonesia</option>
+      <option value="TH">Thailand</option>
+      <option value="SG">Singapore</option>
+    </select>
+  </div>
+
+  <div class="announce-bar" id="announce-bar" style="display:none">
+    <div class="marquee-inner" id="announce-text"></div>
+  </div>
+
+  <div class="maintenance-bar" id="maint-bar" style="display:none">
+    🔒 🔧 <span id="maint-text">Website is in maintenance</span>
+  </div>
+
+  <div class="admin-tabs" style="margin-bottom:14px">
+    <button class="admin-tab active" onclick="switchUserTab('home')">🏠 Home</button>
+    <button class="admin-tab" onclick="switchUserTab('bots')">🤖 Bot Launches</button>
+    <button class="admin-tab" onclick="switchUserTab('history')">📋 History</button>
+    <button class="admin-tab" onclick="switchUserTab('coupons')">🎟️ Coupons</button>
+    <button class="admin-tab" onclick="switchUserTab('contact')">💬 Contact</button>
+  </div>
+
+  <!-- HOME TAB -->
+  <div id="utab-home" class="tab-panel active">
+    <div class="section-heading"><span class="h-icon">🛒</span> Buy Credits</div>
+    <div class="credits-scroll" id="user-credit-packs">
+      <!-- dynamically from backend -->
+    </div>
+
+    <div id="launch-section" style="margin-top:16px">
+      <div class="section-heading"><span class="h-icon">🚀</span> Launch Glory Bot</div>
+      <div class="launch-card">
+        <div class="launch-fields">
+          <div>
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Guild UID</label>
+            <input type="text" id="launch-uid" placeholder="Enter your Free Fire Guild UID">
+          </div>
+          <div>
+            <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:6px">Glory Target</label>
+            <select id="launch-goal">
+              <option value="100000">1 Lakh (100,000)</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-launch" onclick="launchBot()">⚡ Launch Bot — Uses 1 Credit</button>
+      </div>
+    </div>
+
+    <div id="active-bot-section" style="margin-top:6px;display:none">
+      <div class="section-heading"><span class="h-icon">🤖</span> Active Bot</div>
+      <div class="bot-card" id="user-bot-card"></div>
+    </div>
+  </div>
+
+  <!-- BOTS TAB -->
+  <div id="utab-bots" class="tab-panel">
+    <div class="section-heading" style="margin-top:4px"><span class="h-icon">🚀</span> Bot Launch History</div>
+    <div id="bot-launches-list" style="padding:0 16px"></div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div id="utab-history" class="tab-panel">
+    <div class="section-heading" style="margin-top:4px">
+      <span class="h-icon">💵</span> Transactions
+      <button onclick="renderUserHistory()" style="margin-left:auto;background:transparent;color:var(--blue);font-size:13px;font-weight:700">↺ Refresh</button>
+    </div>
+    <div id="txn-list" style="padding:0 16px"></div>
+  </div>
+
+  <!-- COUPONS TAB -->
+  <div id="utab-coupons" class="tab-panel">
+    <div class="section-heading" style="margin-top:4px"><span class="h-icon">🎟️</span> Redeem Coupon</div>
+    <div style="padding:0 16px 16px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px">Enter a coupon code to get free credits</div>
+        <div style="display:flex;gap:10px;margin-bottom:10px">
+          <input type="text" id="coupon-input" placeholder="ENTER CODE" style="letter-spacing:2px;font-weight:700;text-transform:uppercase">
+          <button class="btn-redeem" onclick="redeemCoupon()">REDEEM</button>
+        </div>
+        <div id="coupon-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT TAB -->
+  <div id="utab-contact" class="tab-panel">
+    <div style="padding:16px">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;margin-bottom:14px">
+        <div style="font-size:36px;margin-bottom:10px">✈️</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:4px">Telegram Support</div>
+        <div style="color:var(--text2);font-size:13px;margin-bottom:14px">Get help instantly on Telegram</div>
+        <a href="https://t.me/ydv_mod" target="_blank" class="btn-launch" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;background:#1d9bf0">@ydv_mod →</a>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center">
+        <div style="font-size:36px;margin-bottom:10px">📱</div>
+        <div style="font-size:16px;font-weight:800;margin-bottom:4px">WhatsApp Support</div>
+        <div style="color:var(--text2);font-size:13px;margin-bottom:14px">Chat with us on WhatsApp</div>
+        <a href="https://wa.me/917483121631" target="_blank" class="btn-launch" style="text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;background:#25d366">+91 7483121631 →</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="bottom-nav-inner">
+      <div class="nav-item active" onclick="switchUserTab('history')"><div class="nav-i">💵</div>History</div>
+      <div class="nav-item" onclick="switchUserTab('coupons')"><div class="nav-i">🎁</div>Coupons</div>
+      <div class="nav-item home-btn" onclick="switchUserTab('home')">⚡</div>
+      <div class="nav-item" onclick="switchUserTab('bots')"><div class="nav-i">🚀</div>Launches</div>
+      <div class="nav-item" onclick="switchUserTab('contact')"><div class="nav-i">💬</div>Contact</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ ADMIN PANEL ═══════════════ -->
+<div id="adminpanel" class="screen">
+  <nav class="admin-nav">
+    <div>
+      <div class="admin-brand">👑 GLORY BOT <span>ADMIN</span></div>
+      <div class="live-dot" style="margin-top:3px">MASTER CONTROL</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="admin-badge">ADMIN</div>
+      <div class="nav-icon-btn" onclick="doLogout()">↩️</div>
+    </div>
+  </nav>
+
+  <div class="admin-stats">
+    <div class="admin-stat"><div class="admin-stat-val" id="a-stat-users" style="color:var(--blue)">0</div><div class="admin-stat-label">Users</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="a-stat-orders" style="color:var(--orange)">0</div><div class="admin-stat-label">Orders</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="a-stat-bots" style="color:var(--green)">0</div><div class="admin-stat-label">Bots</div></div>
+    <div class="admin-stat"><div class="admin-stat-val" id="a-stat-pending" style="color:var(--red)">0</div><div class="admin-stat-label">Pending</div></div>
+  </div>
+
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="switchAdminTab('orders')">📋 Orders</button>
+    <button class="admin-tab" onclick="switchAdminTab('users')">👥 Users</button>
+    <button class="admin-tab" onclick="switchAdminTab('bots')">🤖 Bots</button>
+    <button class="admin-tab" onclick="switchAdminTab('coupons')">🎟️ Coupons</button>
+    <button class="admin-tab" onclick="switchAdminTab('credits')">💳 Credits</button>
+    <button class="admin-tab" onclick="switchAdminTab('pricing')">💰 Pricing</button>
+    <button class="admin-tab" onclick="switchAdminTab('branding')">🎨 Branding</button>
+    <button class="admin-tab" onclick="switchAdminTab('broadcast')">📢 Broadcast</button>
+  </div>
+
+  <div class="admin-content">
+    <!-- ORDERS -->
+    <div id="atab-orders" class="tab-panel active">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">All Purchase Orders</div>
+      <div id="admin-orders-list"></div>
+    </div>
+
+    <!-- USERS -->
+    <div id="atab-users" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">User Management</div>
+      <div id="admin-users-list"></div>
+    </div>
+
+    <!-- BOTS -->
+    <div id="atab-bots" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">Live Bot Editor</div>
+      <div id="admin-bots-list"></div>
+    </div>
+
+    <!-- COUPONS -->
+    <div id="atab-coupons" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">Coupon Manager</div>
+      <div class="coupon-gen">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--blue2)">Generate New Coupon</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
+          <input type="text" id="new-coupon-code" placeholder="COUPONCODE" style="text-transform:uppercase;letter-spacing:2px;font-weight:800;font-size:15px">
+          <button class="btn-gen" onclick="randomCoupon()">🎲 Random</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">CREDITS VALUE</label>
+            <input type="number" id="new-coupon-credits" value="1" min="1">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">MAX USES</label>
+            <input type="number" id="new-coupon-uses" value="100" min="1">
+          </div>
+        </div>
+        <button class="btn-gen" style="width:100%" onclick="createCoupon()">✅ Create Coupon</button>
+      </div>
+      <div id="admin-coupons-list"></div>
+    </div>
+
+    <!-- CREDITS -->
+    <div id="atab-credits" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">Credit Controller</div>
+      <div class="create-credit-card" style="margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--orange)">⚡ Give Credits by Username</div>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:8px">
+          <input type="text" id="give-credit-username" placeholder="Enter username" style="font-size:14px">
+          <input type="number" id="give-credit-amount" value="1" min="1" style="width:70px">
+        </div>
+        <button class="btn-approve" style="width:100%;padding:11px" onclick="giveCreditByUsername()">✅ Give Credits</button>
+      </div>
+      <div class="create-credit-card">
+        <div style="font-size:13px;font-weight:700;margin-bottom:12px;color:var(--blue2)">Manually Adjust User Credits</div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">SELECT USER</label>
+          <select id="credit-user-select" style="font-size:14px"></select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">AMOUNT</label>
+            <input type="number" id="credit-amount" value="1" min="1" placeholder="Credits">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:4px">CURRENT</label>
+            <div id="credit-current-display" style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:12px;font-weight:700;color:var(--blue2);font-size:14px">—</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-approve" style="flex:1;padding:11px" onclick="adjustCredits('add')">+ Add Credits</button>
+          <button class="btn-reject" style="flex:1;padding:11px" onclick="adjustCredits('remove')">− Remove Credits</button>
+        </div>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">Set Credits (override)</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+          <input type="number" id="credit-set-amount" placeholder="Set exact credits" min="0">
+          <button class="btn-gen" onclick="setCredits()">SET</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRANDING -->
+    <div id="atab-branding" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">🎨 Website Logo</div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center">
+        <div style="display:flex;justify-content:center;margin-bottom:14px">
+          <div id="logo-preview" style="width:64px;height:64px;border-radius:14px;background:linear-gradient(135deg,#1e3a5f,#0d1117);border:1.5px solid var(--blue);display:flex;align-items:center;justify-content:center;font-size:30px;overflow:hidden">⚡</div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:14px">Upload a logo image from your gallery. It will replace the ⚡ icon across the whole site.</div>
+        <input type="file" id="logo-upload-input" accept="image/*" onchange="handleLogoUpload(event)" style="margin-bottom:12px">
+        <button class="btn-delete-coupon" style="width:100%;padding:12px;border-radius:12px" onclick="resetLogo()">↩ Reset to Default ⚡</button>
+      </div>
+    </div>
+
+    <!-- BROADCAST -->
+    <div id="atab-broadcast" class="tab-panel">
+      <div class="broadcast-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text2)">📢 Global Announcement</div>
+        <textarea id="broadcast-text" rows="4" placeholder="Type your announcement to all users..."></textarea>
+        <button class="btn-broadcast" onclick="sendBroadcast()">📢 Send to All Users</button>
+        <button class="btn-delete-coupon" style="width:100%;margin-top:8px;padding:12px;border-radius:12px" onclick="clearBroadcast()">🗑️ Clear Announcement</button>
+      </div>
+      <div style="margin-top:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px">
+        <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:8px;letter-spacing:1px">MAINTENANCE MODE</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-approve" style="flex:1;padding:11px" onclick="setMaintenance(true)">🔧 Enable</button>
+          <button class="btn-reject" style="flex:1;padding:11px" onclick="setMaintenance(false)">✅ Disable</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div id="atab-pricing" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text2)">💰 Price List Manager</div>
+      <div id="pricing-list"></div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--blue2);margin-bottom:12px">➕ Add New Pack</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">ICON EMOJI</label>
+            <input type="text" id="new-pack-icon" placeholder="💎" style="font-size:20px;text-align:center">
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">PACK NAME</label>
+            <input type="text" id="new-pack-name" placeholder="5 CREDITS — PRO">
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">CREDITS</label>
+            <input type="number" id="new-pack-credits" value="1" min="1">
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">PRICE (₹)</label>
+            <input type="number" id="new-pack-price" value="499" min="1">
+          </div>
+          <div>
+            <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">BADGE</label>
+            <input type="text" id="new-pack-badge" placeholder="POPULAR">
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">DESCRIPTION</label>
+          <input type="text" id="new-pack-desc" placeholder="4 Glory Bots · 1 Squad">
+        </div>
+        <button class="btn-gen" style="width:100%" onclick="addPricePack()">✅ Add Pack</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SETTINGS SHEET ═══════════════ -->
+<div class="settings-sheet" id="settings-sheet" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-inner">
+    <div class="sheet-drag"></div>
+    <div class="sheet-title">⚙️ Settings</div>
+    <div class="settings-row"><span class="sr-label">Email</span><span class="sr-val" id="s-email">—</span></div>
+    <div class="settings-row"><span class="sr-label">Username</span><span class="sr-val" id="s-username">—</span></div>
+    <div class="settings-row"><span class="sr-label">Credits</span><span class="sr-val" style="color:var(--blue)" id="s-credits">0</span></div>
+    <div class="settings-row"><span class="sr-label">Role</span><span class="sr-val" id="s-role">user</span></div>
+    <div style="margin-top:16px">
+      <button onclick="doLogout()" style="width:100%;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:12px;padding:13px;font-size:14px;font-weight:700">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ BUY MODAL ═══════════════ -->
+<div class="modal-overlay" id="buy-modal" onclick="if(event.target===this)closeBuyModal()">
+  <div class="modal-box">
+    <div class="modal-drag"></div>
+    <div class="modal-title" id="buy-modal-title">Buy Credits</div>
+    <div class="modal-subtitle">Scan QR and pay via UPI</div>
+    <div style="display:flex;justify-content:center;margin-bottom:12px">
+      <div class="qr-box">
+        <img class="qr-img" id="buy-qr" src="" alt="QR">
+      </div>
+    </div>
+    <div class="upi-info">
+      <div class="upi-id">UPI: adityahere777@fam</div>
+      <div class="upi-amount" id="buy-amount-display">₹...</div>
+    </div>
+    
+    <div id="payment-verify-status" style="background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:12px;padding:12px;color:var(--blue2);font-size:13px;font-weight:600;margin-bottom:14px;text-align:center">
+      ⏳ Waiting for payment auto-verification...
+    </div>
+
+    <div id="screenshot-section" style="display:none;">
+      <div class="field-group">
+        <div class="field-label">🔖 UTR Transaction Number</div>
+        <input type="text" id="utr-input" placeholder="Auto-filled UTR after verification" readonly style="background:var(--bg3);opacity:0.8;color:var(--green)">
+      </div>
+      <div class="field-group">
+        <div class="field-label">📷 Upload Payment Screenshot</div>
+        <input type="file" id="screenshot-input" accept="image/*" style="font-size:12px;padding:8px;">
+      </div>
+      <div id="buy-status" style="display:none;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:12px;padding:12px;color:var(--green);font-size:13px;font-weight:600;margin-bottom:10px;text-align:center"></div>
+      <button class="btn-login" id="buy-submit-btn" onclick="submitOrder()">Submit Screenshot for Approval</button>
+    </div>
+    <button onclick="closeBuyModal()" style="width:100%;background:transparent;color:var(--text3);padding:12px;font-size:14px;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══════════════ CONFIRM DELETE MODAL ═══════════════ -->
+<div class="modal-overlay" id="delete-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal-box">
+    <div class="modal-drag"></div>
+    <div style="text-align:center;padding:10px 0">
+      <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+      <div class="modal-title" style="justify-content:center">Delete Bot?</div>
+      <div class="modal-subtitle" style="margin-top:6px">This will stop execution permanently. Credits will NOT be refunded.</div>
+      <button id="confirm-delete-btn" class="btn-delete-bot" style="width:100%;margin-top:16px;padding:14px;border-radius:13px">🗑️ Delete Permanently</button>
+      <button onclick="document.getElementById('delete-modal').classList.remove('open')" style="width:100%;background:transparent;color:var(--text3);padding:13px;font-size:14px;margin-top:8px">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ GUILD SETTINGS MODAL ═══════════════ -->
+<div class="modal-overlay" id="guild-modal">
+  <div class="modal-box" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-drag"></div>
+    <div style="text-align:center;margin-bottom:16px">
+      <div style="font-size:28px;margin-bottom:6px">⚙️</div>
+      <div class="modal-title" style="display:block;text-align:center">Guild Settings</div>
+      <div class="modal-subtitle" style="text-align:center">Make sure your guild has the correct settings for bot joining.</div>
+    </div>
+    <div style="background:#1a1a2e;border-radius:14px;padding:16px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;font-weight:800;color:var(--orange);letter-spacing:1px;margin-bottom:8px">▍ APPROVAL METHOD</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;margin-bottom:6px">
+          <span style="font-size:13px;font-weight:600">AUTO APPROVAL</span>
+          <div style="display:flex;gap:0">
+            <span style="background:rgba(255,255,255,.15);padding:3px 14px;font-size:11px;font-weight:700;border-radius:4px 0 0 4px">OFF</span>
+            <span style="background:var(--orange);padding:3px 14px;font-size:11px;font-weight:700;color:#fff;border-radius:0 4px 4px 0">ON</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px">
+          <span style="font-size:12px;color:var(--text2)">LV.</span>
+          <span style="font-size:12px;color:var(--text3)">DEFAULT ▾</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px">
+          <span style="font-size:12px;color:var(--text2)">BR-RANKED</span>
+          <span style="font-size:12px;color:var(--text3)">DEFAULT ▾</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px">
+          <span style="font-size:12px;color:var(--text2)">CS-RANKED</span>
+          <span style="font-size:12px;color:var(--text3)">DEFAULT ▾</span>
+        </div>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-size:11px;font-weight:800;color:var(--orange);letter-spacing:1px;margin-bottom:8px">▍ GUILD TAGS <span style="color:var(--orange);font-weight:600">Only the first 4 tags will be shown</span></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;padding:0 4px">
+          <span style="background:var(--orange);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px">COMPETITIVE</span>
+          <span style="background:rgba(255,255,255,.1);color:var(--text2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px">4-5 DAYS PER WEEK</span>
+          <span style="background:rgba(255,255,255,.1);color:var(--text2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:6px">MIC ON</span>
+        </div>
+      </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:11px;font-weight:800;color:var(--orange);letter-spacing:1px;margin-bottom:6px">▍ SLOGAN</div>
+        <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--text)">BE THE BEST PERFORMER!!</div>
+      </div>
+    </div>
+    <div style="background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.3);border-radius:12px;padding:12px 14px;margin-bottom:18px;display:flex;align-items:flex-start;gap:10px">
+      <span style="font-size:16px">⚠️</span>
+      <div style="font-size:13px;color:var(--orange);line-height:1.5">Set <strong>"Join the Guild"</strong> to <strong>Anyone Can Join</strong> in your guild settings before launching.</div>
+    </div>
+    <button class="btn-primary" style="width:100%" onclick="confirmLaunchBot()">✅ I've Set It — Launch Bot</button>
+    <button onclick="document.getElementById('guild-modal').classList.remove('open')" style="width:100%;background:transparent;color:var(--text3);padding:13px;font-size:14px;margin-top:8px">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══════════════ TOAST ═══════════════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  GLOBAL STATE (loaded from backend)
+// ─────────────────────────────────────────────────────────────────────────────
+let state = {
+  users: {},
+  orders: [],
+  bots: {},
+  coupons: {},
+  redeemedBy: {},
+  pricePacks: [],
+  announcement: '',
+  maintenance: false,
+  siteLogo: '⚡'
+};
+
+let currentUser = null;   // username
+let buyPkg = { credits:1, price:499 };
+let pendingDeleteId = null;
+let currentAdminTab = 'orders';
+let currentUserTab = 'home';
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BACKEND API HELPERS
+// ─────────────────────────────────────────────────────────────────────────────
+async function apiFetch(endpoint, options = {}) {
+  const res = await fetch(endpoint, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  return res.json();
+}
+
+// Load all state from backend
+async function loadState() {
+  try {
+    const data = await apiFetch('/api/get-private-data');
+    state = data;   // full state
+    // ensure we have all fields
+    state.redeemedBy = state.redeemedBy || {};
+    state.orders = state.orders || [];
+    state.bots = state.bots || {};
+    state.coupons = state.coupons || {};
+    state.pricePacks = state.pricePacks || [];
+    state.announcement = state.announcement || '';
+    state.maintenance = state.maintenance || false;
+    state.siteLogo = state.siteLogo || '⚡';
+    return true;
+  } catch(e) {
+    console.error('Error loading state:', e);
+    showToast('Failed to load data from server.', 'error');
+    return false;
+  }
+}
+
+// Save state changes back to server (only specific keys)
+async function saveState() {
+  const payload = {
+    orders: state.orders,
+    bots: state.bots,
+    coupons: state.coupons,
+    redeemedBy: state.redeemedBy,
+    pricePacks: state.pricePacks,
+    announcement: state.announcement,
+    maintenance: state.maintenance,
+    siteLogo: state.siteLogo
+  };
+  try {
+    await apiFetch('/api/save-state', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+  } catch(e) {
+    console.error('Save failed:', e);
+    showToast('Could not save changes to server.', 'error');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SCREEN / NAV
+// ─────────────────────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showAuth(tab) {
+  showScreen('auth');
+  switchAuthTab(tab);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  AUTH
+// ─────────────────────────────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.getElementById('form-login').style.display = tab==='login' ? 'block' : 'none';
+  document.getElementById('form-register').style.display = tab==='register' ? 'block' : 'none';
+  document.getElementById('tab-login').classList.toggle('active', tab==='login');
+  document.getElementById('tab-register').classList.toggle('active', tab==='register');
+}
+
+async function doLogin() {
+  const username = document.getElementById('login-user').value.trim();
+  const password = document.getElementById('login-pass').value;
+  const err = document.getElementById('login-error');
+  try {
+    const data = await apiFetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+    if (data.error) {
+      err.textContent = data.error;
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    currentUser = username;
+    // load fresh state
+    await loadState();
+    if (data.role === 'admin') {
+      showAdminPanel();
+    } else {
+      showUserDash();
+    }
+  } catch(e) {
+    err.textContent = 'Network error.';
+    err.style.display = 'block';
+  }
+}
+
+async function doAdminLogin() {
+  const username = document.getElementById('adminlogin-user').value.trim();
+  const password = document.getElementById('adminlogin-pass').value;
+  const err = document.getElementById('adminlogin-error');
+  try {
+    const data = await apiFetch('/api/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password })
+    });
+    if (data.error) {
+      err.textContent = data.error;
+      err.style.display = 'block';
+      return;
+    }
+    if (data.role !== 'admin') {
+      err.textContent = 'Access denied — admins only.';
+      err.style.display = 'block';
+      return;
+    }
+    err.style.display = 'none';
+    currentUser = username;
+    await loadState();
+    showAdminPanel();
+  } catch(e) {
+    err.textContent = 'Network error.';
+    err.style.display = 'block';
+  }
+}
+
+async function requestOTP() {
+  const email = document.getElementById('reg-email').value.trim();
+  const err = document.getElementById('reg-error');
+  const btn = document.getElementById('btn-send-otp');
+  
+  if (!email) {
+    err.textContent = 'Please enter an email first to get OTP.';
+    err.style.display = 'block';
+    return;
+  }
+  
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  err.style.display = 'none';
+  
+  try {
+    const data = await apiFetch('/api/send-otp', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+    
+    if (data.error) {
+      err.textContent = data.error;
+      err.style.display = 'block';
+      btn.textContent = 'Send OTP';
+      btn.disabled = false;
+      return;
+    }
+    
+    // Success
+    btn.textContent = 'Sent ✅';
+    setTimeout(() => {
+      btn.textContent = 'Send OTP';
+      btn.disabled = false;
+    }, 60000); // 1 minute cooldown
+  } catch(e) {
+    err.textContent = 'Network error while sending OTP.';
+    err.style.display = 'block';
+    btn.textContent = 'Send OTP';
+    btn.disabled = false;
+  }
+}
+
+async function doRegister() {
+  const email = document.getElementById('reg-email').value.trim();
+  const otp = document.getElementById('reg-otp').value.trim();
+  const username = document.getElementById('reg-user').value.trim();
+  const password = document.getElementById('reg-pass').value;
+  const err = document.getElementById('reg-error');
+  const succ = document.getElementById('reg-success');
+  
+  if (!email || !otp || !username || !password) {
+    err.textContent = 'Fill all fields including OTP.';
+    err.style.display = 'block';
+    succ.style.display = 'none';
+    return;
+  }
+  try {
+    const data = await apiFetch('/api/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, otp, username, password })
+    });
+    if (data.error) {
+      err.textContent = data.error;
+      err.style.display = 'block';
+      succ.style.display = 'none';
+      return;
+    }
+    err.style.display = 'none';
+    succ.style.display = 'block';
+    document.getElementById('reg-email').value = '';
+    document.getElementById('reg-otp').value = '';
+    document.getElementById('reg-user').value = '';
+    document.getElementById('reg-pass').value = '';
+    
+    // Reload state to get new user
+    await loadState();
+    setTimeout(() => {
+      succ.style.display = 'none';
+      switchAuthTab('login');
+    }, 1500);
+  } catch(e) {
+    err.textContent = 'Network error.';
+    err.style.display = 'block';
+  }
+}
+
+async function doLogout() {
+  try {
+    await apiFetch('/api/logout', { method: 'POST' });
+  } catch(e) {}
+  currentUser = null;
+  showScreen('landing');
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  // reload landing state
+  await loadState();
+  renderLandingPacks();
+  applyLogoEverywhere();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  USER DASHBOARD
+// ─────────────────────────────────────────────────────────────────────────────
+function showUserDash() {
+  showScreen('userdash');
+  refreshUserDash();
+  renderUserPacks();
+}
+
+function refreshUserDash() {
+  const u = state.users[currentUser];
+  if (!u) return;
+  document.getElementById('u-avatar-letter').textContent = u.username[0].toUpperCase();
+  document.getElementById('u-display-name').textContent = u.username;
+  document.getElementById('u-role-badge').textContent = `(${u.role})`;
+  document.getElementById('u-credits-display').textContent = u.credits;
+
+  // announcement
+  const ab = document.getElementById('announce-bar');
+  const at = document.getElementById('announce-text');
+  if (state.announcement) {
+    ab.style.display = 'block';
+    at.textContent = state.announcement + ' · ' + state.announcement + ' · ';
+  } else { ab.style.display = 'none'; }
+
+  // maintenance
+  const mb = document.getElementById('maint-bar');
+  mb.style.display = state.maintenance ? 'flex' : 'none';
+
+  // settings
+  document.getElementById('s-email').textContent = u.email;
+  document.getElementById('s-username').textContent = u.username;
+  document.getElementById('s-credits').textContent = u.credits;
+  document.getElementById('s-role').textContent = u.role;
+
+  renderBotCard();
+  renderUserHistory();
+  renderBotLaunches();
+  applyLogoEverywhere();
+}
+
+function renderBotCard() {
+  const myBots = Object.values(state.bots).filter(b => b.owner === currentUser && !b.rejected);
+  const sec = document.getElementById('active-bot-section');
+  const card = document.getElementById('user-bot-card');
+
+  if (myBots.length === 0) { sec.style.display='none'; return; }
+  sec.style.display = 'block';
+  const bot = myBots[myBots.length-1];
+  const { status, pct, cls, msLeft } = getBotStatus(bot);
+
+  let waitNote = '';
+  if (status === 'PENDING APPROVAL') waitNote = `<div style="font-size:12px;color:var(--text2);margin-top:8px">⏳ Your launch request is waiting for admin approval. Glory starts 15 minutes after approval.</div>`;
+  if (status === 'STARTING SOON') waitNote = `<div style="font-size:12px;color:var(--blue2);margin-top:8px">⏳ Approved! Bot goes live in <strong id="bot-countdown-${bot.id}">${fmtCountdown(msLeft)}</strong></div>`;
+
+  const now2 = Date.now();
+  let uptimeStr = '0h 0m';
+  if (bot.startTime && now2 > bot.startTime) {
+    const mins = Math.floor((now2 - bot.startTime)/60000);
+    uptimeStr = `${Math.floor(mins/60)}h ${mins%60}m`;
+  }
+  const logoInner = state.siteLogo ? `<img src="${state.siteLogo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : '⚡';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div style="width:52px;height:52px;border-radius:12px;background:linear-gradient(135deg,#1e3a5f,#0d1117);border:2px solid var(--orange);display:flex;align-items:center;justify-content:center;font-size:26px;overflow:hidden;flex-shrink:0">${logoInner}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${bot.guildName||'Guild'}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">ID: ${bot.uid} · 🇮🇳 ${bot.server||'IND'} · <span style="color:var(--blue2);font-weight:700">${bot.botCount||4} BOTS</span></div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic">"SAFE GLORY — GLORY BOT PRO"</div>
+      </div>
+      <div class="status-badge ${cls}" style="flex-shrink:0">${status==='ACTIVE LIVE'?'● ':''}${status}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid var(--border)">
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👥 Members</div>
+        <div style="font-size:18px;font-weight:900">${bot.members||7}<span style="font-size:12px;color:var(--text3)">/${bot.maxMembers||55}</span></div>
+      </div>
+      <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👑 Leader</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text2)">—</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">⭐ Total Glory</div>
+        <div style="font-size:18px;font-weight:900;color:var(--orange)">${(bot.glory||0).toLocaleString()}</div>
+      </div>
+    </div>
+    <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite"></div>
+        <span style="font-size:13px;font-weight:700;color:var(--green)">FF GLORY • ${status}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px">
+        ${bot.guildName||'Guild'} · Lv${bot.level||5} · <span style="font-size:11px">⚡ ${bot.botCount||4} bots</span> · Basic · 1 Prime Squad
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:13px;color:var(--text2)">⏱ Uptime <strong style="color:var(--blue2)">${uptimeStr}</strong></div>
+        <div style="font-size:13px;color:var(--text2)">⭐ Glory <strong style="color:var(--orange)">${(bot.glory||0).toLocaleString()}</strong></div>
+      </div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">8H GOAL <span style="float:right;color:var(--orange)">${Math.round(pct)}%</span></div>
+      <div class="goal-bar"><div class="goal-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Created: ${new Date(bot.requestTime||Date.now()).toLocaleDateString('en-GB',{day:'2-digit',month:'2-digit',year:'numeric'})} · 🇮🇳 India</div>
+    </div>
+    ${waitNote}
+    <div class="bot-actions">
+      <button class="btn-restart" onclick="restartBot('${bot.id}')">🔄 Restart Bot</button>
+      <button class="btn-delete-bot" onclick="confirmDeleteBot('${bot.id}')">🗑 Delete</button>
+    </div>
+  `;
+}
+
+function renderUserHistory() {
+  const list = document.getElementById('txn-list');
+  const myOrders = state.orders.filter(o => o.username === currentUser);
+  if (myOrders.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="e-icon">💵</div>No transactions yet.</div>';
+    return;
+  }
+  list.innerHTML = [...myOrders].reverse().map(o => `
+    <div class="history-card">
+      <div class="hist-icon">💳</div>
+      <div>
+        <div class="hist-name">${o.credits} Credit${o.credits>1?'s':''} — ₹${o.price}</div>
+        <div class="hist-meta">UTR: ${o.utr} · ${new Date(o.ts).toLocaleDateString()}</div>
+      </div>
+      <div class="hist-status"><div class="hist-badge ${o.status==='approved'?'success':o.status==='rejected'?'failed':'pending'}">${o.status.toUpperCase()}</div></div>
+    </div>
+  `).join('');
+}
+
+function renderBotLaunches() {
+  const list = document.getElementById('bot-launches-list');
+  const myBots = Object.values(state.bots).filter(b => b.owner === currentUser);
+  if (myBots.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="e-icon">🚀</div>No bot launches yet.</div>';
+    return;
+  }
+  list.innerHTML = myBots.map(b => {
+    const { status, pct } = getBotStatus(b);
+    const cls = status==='ACTIVE LIVE'?'success':(status==='PENDING APPROVAL'||status==='STARTING SOON')?'pending':status==='REJECTED'?'failed':'pending';
+    return `
+      <div class="history-card">
+        <div class="hist-icon" style="overflow:hidden;border-radius:8px">${state.siteLogo ? `<img src="${state.siteLogo}" style="width:100%;height:100%;object-fit:cover">` : '⚡'}</div>
+        <div>
+          <div class="hist-name">${b.guildName||'Guild Bot'}</div>
+          <div class="hist-meta">UID: ${b.uid} · Requested: ${new Date(b.requestTime||0).toLocaleString()}</div>
+          <div class="hist-meta">Glory: ${(b.glory||0).toLocaleString()} · ${Math.round(pct)}% complete</div>
+        </div>
+        <div class="hist-status"><div class="hist-badge ${cls}">${status}</div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function switchUserTab(tab) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('utab-'+tab).classList.add('active');
+  currentUserTab = tab;
+  if (tab==='history') renderUserHistory();
+  if (tab==='bots') renderBotLaunches();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BOT ACTIONS
+// ─────────────────────────────────────────────────────────────────────────────
+async function launchBot() {
+  const u = state.users[currentUser];
+  if (!u || u.credits < 1) { showToast('Not enough credits!','error'); return; }
+  const uid = document.getElementById('launch-uid').value.trim();
+  if (!uid) { showToast('Enter Guild UID first!','error'); return; }
+  document.getElementById('guild-modal').classList.add('open');
+}
+
+async function confirmLaunchBot() {
+  document.getElementById('guild-modal').classList.remove('open');
+  const u = state.users[currentUser];
+  if (!u || u.credits < 1) { showToast('Not enough credits!','error'); return; }
+  const uid = document.getElementById('launch-uid').value.trim();
+  const goal = document.getElementById('launch-goal').value;
+  const server = document.getElementById('u-server').value;
+  if (!uid) { showToast('Enter Guild UID first!','error'); return; }
+  const id = genId();
+  u.credits--;
+  state.bots[id] = {
+    id, owner:currentUser, uid, server,
+    guildName:'Guild', emoji:'⚔️', level:5, members:7,
+    glory:0, score:0, goal:parseInt(goal),
+    requestTime:Date.now(), approved:false, approvedTime:null, startTime:null, rejected:false,
+    overrideStatus:null, overridePct:null
+  };
+  await saveState();
+  refreshUserDash();
+  switchUserTab('bots');
+  showToast('🚀 Launch request sent! Waiting for admin approval.','success');
+}
+
+function getBotStatus(b) {
+  if (b.rejected) return { status:'REJECTED', pct:0, cls:'expired' };
+  if (!b.approved) return { status:'PENDING APPROVAL', pct:0, cls:'pending' };
+  if (b.overrideStatus) {
+    const cls = b.overrideStatus==='ACTIVE LIVE'?'live':b.overrideStatus==='OFFLINE'?'offline':'expired';
+    return { status:b.overrideStatus, pct:(b.overridePct!==null?b.overridePct:0), cls };
+  }
+  const now = Date.now();
+  if (b.startTime && now < b.startTime) {
+    const msLeft = b.startTime - now;
+    return { status:'STARTING SOON', pct:0, cls:'pending', msLeft };
+  }
+  const elapsed = b.startTime ? (now - b.startTime)/3600000 : 0;
+  const rawPct = Math.min((elapsed/8)*100, 100);
+  const pct = b.overridePct !== null ? b.overridePct : rawPct;
+  const status = pct >= 100 ? 'EXPIRED' : 'ACTIVE LIVE';
+  return { status, pct, cls: status==='ACTIVE LIVE'?'live':'expired' };
+}
+
+function fmtCountdown(ms) {
+  if (ms <= 0) return '0:00';
+  const m = Math.floor(ms/60000), s = Math.floor((ms%60000)/1000);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+
+async function approveBotRequest(id) {
+  const b = state.bots[id];
+  if (!b) return;
+  b.approved = true;
+  b.approvedTime = Date.now();
+  b.startTime = Date.now() + 15*60*1000;
+  b.rejected = false;
+  b.overrideStatus = null; b.overridePct = null;
+  await saveState();
+  renderAdminBots(); refreshAdminStats();
+  if (currentUser) refreshUserDash();
+  showToast('✅ Bot approved! It will go live in 15 minutes.','success');
+}
+
+async function rejectBotRequest(id) {
+  const b = state.bots[id];
+  if (!b) return;
+  b.rejected = true;
+  b.approved = false;
+  if (state.users[b.owner]) state.users[b.owner].credits += 1;
+  await saveState();
+  renderAdminBots(); refreshAdminStats();
+  if (currentUser) refreshUserDash();
+  showToast('❌ Bot launch rejected — credit refunded to owner.','info');
+}
+
+async function restartBot(id) {
+  const b = state.bots[id];
+  if (!b) return;
+  if (!b.approved) { showToast('Bot is still pending admin approval.','error'); return; }
+  b.startTime = Date.now();
+  b.overrideStatus = null;
+  b.overridePct = null;
+  await saveState();
+  refreshUserDash();
+  showToast('Bot restarted!','info');
+}
+
+function confirmDeleteBot(id) {
+  pendingDeleteId = id;
+  document.getElementById('confirm-delete-btn').onclick = async () => {
+    delete state.bots[pendingDeleteId];
+    await saveState();
+    document.getElementById('delete-modal').classList.remove('open');
+    refreshUserDash();
+    showToast('Bot deleted.','info');
+  };
+  document.getElementById('delete-modal').classList.add('open');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  BUY CREDITS (Auto Approval & UTR via Fampay API)
+// ─────────────────────────────────────────────────────────────────────────────
+let verifyTimer = null;
+let currentOrderId = null;
+
+async function openBuyModal(credits, price, packId) {
+  buyPkg = { credits, price, packId };
+  document.getElementById('buy-modal-title').textContent = `Buy ${credits} Credit${credits>1?'s':''}`;
+  document.getElementById('buy-amount-display').textContent = `₹${price.toLocaleString()}`;
+  
+  document.getElementById('utr-input').value = '';
+  document.getElementById('screenshot-input').value = '';
+  document.getElementById('buy-status').style.display = 'none';
+  document.getElementById('screenshot-section').style.display = 'none';
+  
+  const vStatus = document.getElementById('payment-verify-status');
+  vStatus.style.display = 'block';
+  vStatus.textContent = '⏳ Generating Payment QR...';
+  vStatus.style.color = 'var(--blue2)';
+  vStatus.style.borderColor = 'rgba(59,130,246,.3)';
+  vStatus.style.background = 'rgba(59,130,246,.1)';
+  
+  document.getElementById('buy-qr').style.opacity = '0.3';
+  document.getElementById('buy-submit-btn').style.display = 'flex';
+  document.getElementById('buy-submit-btn').disabled = false;
+  document.getElementById('buy-submit-btn').textContent = 'Submit Screenshot for Approval';
+  document.getElementById('buy-modal').classList.add('open');
+  
+  if (verifyTimer) clearInterval(verifyTimer);
+
+  try {
+    const res = await apiFetch('/api/fampay/create', {
+      method: 'POST',
+      body: JSON.stringify({ amount: price })
+    });
+    
+    if (res.success) {
+       document.getElementById('buy-qr').src = res.qr;
+       document.getElementById('buy-qr').style.opacity = '1';
+       currentOrderId = res.order_id;
+       vStatus.textContent = '⏳ Waiting for payment auto-verification...';
+       
+       verifyTimer = setInterval(pollVerification, 5000);
+    } else {
+       vStatus.textContent = '❌ Failed to generate QR. ' + (res.message || '');
+       vStatus.style.color = 'var(--red)';
+       vStatus.style.borderColor = 'rgba(239,68,68,.4)';
+       vStatus.style.background = 'rgba(239,68,68,.1)';
+    }
+  } catch(e) {
+    vStatus.textContent = '❌ Error generating QR.';
+  }
+}
+
+async function pollVerification() {
+  if (!currentOrderId) return;
+  try {
+    const res = await fetch(`/api/fampay/verify/${currentOrderId}`);
+    const data = await res.json();
+    
+    if (data.verified) {
+       clearInterval(verifyTimer);
+       const vStatus = document.getElementById('payment-verify-status');
+       vStatus.textContent = '✅ Payment Verified Successfully!';
+       vStatus.style.color = 'var(--green)';
+       vStatus.style.borderColor = 'rgba(34,197,94,.4)';
+       vStatus.style.background = 'rgba(34,197,94,.1)';
+       
+       document.getElementById('utr-input').value = data.utr || 'N/A';
+       document.getElementById('screenshot-section').style.display = 'block';
+    }
+  } catch(e) {
+    console.log('Polling error:', e);
+  }
+}
+
+function closeBuyModal() { 
+  if (verifyTimer) clearInterval(verifyTimer);
+  document.getElementById('buy-modal').classList.remove('open'); 
+}
+
+async function submitOrder() {
+  const utr = document.getElementById('utr-input').value.trim();
+  const fileInput = document.getElementById('screenshot-input');
+  
+  if (!fileInput.files.length) { showToast('Please select a payment screenshot!','error'); return; }
+  
+  const formData = new FormData();
+  formData.append('screenshot', fileInput.files[0]);
+  formData.append('order_id', currentOrderId);
+  formData.append('amount', buyPkg.price);
+  formData.append('credits', buyPkg.credits);
+  formData.append('utr', utr);
+  
+  const submitBtn = document.getElementById('buy-submit-btn');
+  submitBtn.textContent = 'Uploading...';
+  submitBtn.disabled = true;
+
+  try {
+    const res = await fetch('/api/fampay/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    
+    if (data.success) {
+      await loadState();
+      const statusBox = document.getElementById('buy-status');
+      statusBox.style.display = 'block';
+      statusBox.textContent = '✅ Screenshot sent! Waiting for admin approval.';
+      submitBtn.style.display = 'none';
+      refreshAdminStats();
+    } else {
+      showToast('Upload failed: ' + (data.message || ''), 'error');
+      submitBtn.textContent = 'Submit Screenshot for Approval';
+      submitBtn.disabled = false;
+    }
+  } catch(e) {
+    showToast('Network error during upload', 'error');
+    submitBtn.textContent = 'Submit Screenshot for Approval';
+    submitBtn.disabled = false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  COUPONS
+// ─────────────────────────────────────────────────────────────────────────────
+async function redeemCoupon() {
+  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  const msg = document.getElementById('coupon-msg');
+  const c = state.coupons[code];
+  if (!c) { msg.innerHTML='<div style="color:var(--red);font-size:13px">❌ Invalid coupon code.</div>'; return; }
+  if (!state.redeemedBy[code]) state.redeemedBy[code] = [];
+  if (state.redeemedBy[code].includes(currentUser)) { msg.innerHTML='<div style="color:var(--red);font-size:13px">❌ Already redeemed.</div>'; return; }
+  state.users[currentUser].credits += c.credits;
+  c.uses++;
+  state.redeemedBy[code].push(currentUser);
+  await saveState();
+  msg.innerHTML=`<div style="color:var(--green);font-size:13px">✅ Redeemed! +${c.credits} credits added.</div>`;
+  document.getElementById('coupon-input').value = '';
+  refreshUserDash();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  SETTINGS
+// ─────────────────────────────────────────────────────────────────────────────
+function openSettings() { document.getElementById('settings-sheet').classList.add('open'); refreshUserDash(); }
+function closeSettings() { document.getElementById('settings-sheet').classList.remove('open'); }
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  ADMIN PANEL
+// ─────────────────────────────────────────────────────────────────────────────
+function showAdminPanel() {
+  showScreen('adminpanel');
+  refreshAdminStats();
+  renderAdminOrders();
+  renderAdminUsers();
+  renderAdminBots();
+  renderAdminCoupons();
+  renderCreditController();
+  renderAdminPricing();
+  renderLogoPreview();
+  applyLogoEverywhere();
+}
+
+function refreshAdminStats() {
+  const pending = state.orders.filter(o=>o.status==='pending').length;
+  document.getElementById('a-stat-users').textContent = Object.keys(state.users).length;
+  document.getElementById('a-stat-orders').textContent = state.orders.length;
+  document.getElementById('a-stat-bots').textContent = Object.keys(state.bots).length;
+  document.getElementById('a-stat-pending').textContent = pending;
+}
+
+function switchAdminTab(tab) {
+  currentAdminTab = tab;
+  document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.remove('active'));
+  const tabs = ['orders','users','bots','coupons','credits','pricing','branding','broadcast'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.admin-tab')[idx]?.classList.add('active');
+  document.querySelectorAll('#adminpanel .tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('atab-'+tab)?.classList.add('active');
+
+  if (tab==='orders') renderAdminOrders();
+  if (tab==='users') renderAdminUsers();
+  if (tab==='bots') renderAdminBots();
+  if (tab==='coupons') renderAdminCoupons();
+  if (tab==='credits') renderCreditController();
+  if (tab==='pricing') renderAdminPricing();
+  if (tab==='branding') renderLogoPreview();
+  refreshAdminStats();
+}
+
+function renderAdminOrders() {
+  const list = document.getElementById('admin-orders-list');
+  if (!state.orders.length) { list.innerHTML='<div class="empty-state"><div class="e-icon">📋</div>No orders yet.</div>'; return; }
+  list.innerHTML = [...state.orders].reverse().map(o => `
+    <div class="order-card">
+      <div class="order-top">
+        <div>
+          <div class="order-user">@${o.username}</div>
+          <div class="order-meta">${o.credits} Credit${o.credits>1?'s':''} · ₹${o.price} · ${new Date(o.ts).toLocaleString()}</div>
+          <div class="order-utr">UTR: ${o.utr}</div>
+          ${o.screenshot_path ? `<a href="/${o.screenshot_path}" target="_blank" style="font-size:11px;color:var(--blue);text-decoration:underline;display:inline-block;margin-top:4px;">🖼️ View Payment Screenshot</a>` : ''}
+        </div>
+        <div class="hist-badge ${o.status==='approved'?'success':o.status==='rejected'?'failed':'pending'}" style="font-size:11px;font-weight:700;padding:4px 12px;border-radius:99px">${o.status.toUpperCase()}</div>
+      </div>
+      <div class="order-actions">
+        <button class="btn-approve" ${o.status==='approved'?'disabled style="opacity:.4"':''} onclick="approveOrder('${o.id}')">✅ ${o.status==='approved'?'Approved':'Approve'}</button>
+        <button class="btn-reject" ${o.status==='rejected'?'disabled style="opacity:.4"':''} onclick="rejectOrder('${o.id}')">❌ ${o.status==='rejected'?'Rejected':'Reject'}</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function approveOrder(id) {
+  const o = state.orders.find(x=>x.id===id);
+  if (!o) return;
+  if (o.status !== 'approved') {
+    if (state.users[o.username]) state.users[o.username].credits += o.credits;
+    o.status = 'approved';
+  }
+  await saveState();
+  renderAdminOrders(); refreshAdminStats(); renderAdminUsers();
+  showToast(`+${o.credits} credits added to @${o.username}`,'success');
+}
+
+async function rejectOrder(id) {
+  const o = state.orders.find(x=>x.id===id);
+  if (!o) return;
+  if (o.status === 'approved' && state.users[o.username]) {
+    state.users[o.username].credits = Math.max(0, state.users[o.username].credits - o.credits);
+  }
+  o.status = 'rejected';
+  await saveState();
+  renderAdminOrders(); refreshAdminStats(); renderAdminUsers();
+  showToast('Order rejected. Credits reverted if previously applied.','info');
+}
+
+function renderAdminUsers() {
+  const list = document.getElementById('admin-users-list');
+  const users = Object.values(state.users);
+  list.innerHTML = users.map(u => `
+    <div class="user-mgmt-card">
+      <div class="um-top">
+        <div class="um-avatar">${u.username[0].toUpperCase()}</div>
+        <div>
+          <div class="um-name">${u.username} ${u.role==='admin'?'<span class="badge-role admin">ADMIN</span>':''} ${u.role==='admin2'?'<span class="badge-role admin2">ADMIN 2</span>':''} ${u.banned?'<span style="color:var(--red);font-size:11px">BANNED</span>':''}</div>
+          <div class="um-email">${u.email}</div>
+          <div class="um-email">🔑 Password: <code>${u.password}</code></div>
+        </div>
+        <div class="um-credits">💳 ${u.credits}</div>
+      </div>
+      <div class="um-actions">
+        <button class="um-btn add" onclick="quickCredit('${u.username}',1)">+1 CR</button>
+        <button class="um-btn add" onclick="quickCredit('${u.username}',5)">+5 CR</button>
+        <button class="um-btn remove" onclick="quickCredit('${u.username}',-1)">−1 CR</button>
+        <button class="um-btn ban" onclick="toggleBan('${u.username}')">${u.banned?'✅ Unban':'🚫 Ban'}</button>
+        ${u.role!=='admin' ? `<button class="um-btn" style="border-color:rgba(249,115,22,.4);color:var(--orange);background:rgba(249,115,22,.1)" onclick="makeAdmin('${u.username}')">👑 Make Admin</button>` : ''}
+        <button class="um-btn promote" onclick="promoteAdmin2('${u.username}')">⬆ Admin 2</button>
+        <button class="um-btn role" onclick="resetRole('${u.username}')">↩ Reset Role</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function quickCredit(username, amount) {
+  if (!state.users[username]) return;
+  state.users[username].credits = Math.max(0, state.users[username].credits + amount);
+  await saveState();
+  renderAdminUsers(); refreshAdminStats();
+  showToast(`Credits updated for @${username}`,'success');
+}
+
+async function toggleBan(username) {
+  if (!state.users[username]) return;
+  state.users[username].banned = !state.users[username].banned;
+  await saveState();
+  renderAdminUsers();
+  showToast(state.users[username].banned ? `@${username} banned` : `@${username} unbanned`,'info');
+}
+
+async function makeAdmin(username) {
+  if (!state.users[username]) return;
+  state.users[username].role = 'admin';
+  await saveState();
+  renderAdminUsers();
+  showToast(`@${username} is now Admin 👑`,'success');
+}
+
+async function promoteAdmin2(username) {
+  if (!state.users[username]) return;
+  state.users[username].role = 'admin2';
+  await saveState();
+  renderAdminUsers();
+  showToast(`@${username} promoted to Admin 2`,'success');
+}
+
+async function resetRole(username) {
+  if (!state.users[username]) return;
+  state.users[username].role = 'user';
+  await saveState();
+  renderAdminUsers();
+  showToast(`@${username} role reset to user`,'info');
+}
+
+function renderAdminPricing() {
+  const list = document.getElementById('pricing-list');
+  list.innerHTML = state.pricePacks.map((p,i) => `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:28px">${p.icon}</div>
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:14px">${p.name} ${p.badge?`<span style="background:var(--orange);color:#fff;font-size:10px;padding:2px 8px;border-radius:99px;margin-left:6px">${p.badge}</span>`:''}</div>
+          <div style="font-size:12px;color:var(--text3)">${p.desc}</div>
+        </div>
+        <div style="color:var(--orange);font-weight:900;font-size:16px">₹${p.price.toLocaleString()}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">CREDITS</label>
+          <input type="number" value="${p.credits}" min="1" onchange="state.pricePacks[${i}].credits=parseInt(this.value);saveState()" style="padding:8px;font-size:13px;border-radius:9px">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">PRICE ₹</label>
+          <input type="number" value="${p.price}" min="1" onchange="state.pricePacks[${i}].price=parseInt(this.value);saveState();renderUserPacks()" style="padding:8px;font-size:13px;border-radius:9px">
+        </div>
+        <div>
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">BADGE</label>
+          <input type="text" value="${p.badge||''}" placeholder="POPULAR" onchange="state.pricePacks[${i}].badge=this.value;saveState()" style="padding:8px;font-size:13px;border-radius:9px">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+        <input type="text" value="${p.name}" placeholder="Pack name" onchange="state.pricePacks[${i}].name=this.value;saveState()" style="padding:8px;font-size:13px;border-radius:9px">
+        <button onclick="deletePricePack('${p.id}')" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700">Delete</button>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+        ${p.qrImage?`<img src="${p.qrImage}" style="width:40px;height:40px;border-radius:8px;border:1px solid var(--border)">`:''}
+        <div style="flex:1">
+          <label style="font-size:10px;color:var(--text3);display:block;margin-bottom:4px">UPLOAD CUSTOM QR (from gallery)</label>
+          <input type="file" accept="image/*" onchange="handlePackQrUpload(event,'${p.id}')" style="font-size:11px">
+        </div>
+        ${p.qrImage?`<button onclick="state.pricePacks[${i}].qrImage=null;saveState();renderAdminPricing()" style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:var(--red);border-radius:9px;padding:6px 10px;font-size:11px">Remove</button>`:''}
+      </div>
+      <button class="btn-save" style="margin-top:10px" onclick="savePricePack(${i})">💾 Save Pack</button>
+    </div>
+  `).join('');
+}
+
+async function handlePackQrUpload(evt, packId) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const pack = state.pricePacks.find(p=>p.id===packId);
+  if (!pack) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    pack.qrImage = e.target.result;
+    saveState();
+    renderAdminPricing();
+    showToast('Custom QR uploaded for this pack!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function savePricePack(i) {
+  await saveState();
+  renderUserPacks();
+  renderAdminPricing();
+  renderLandingPacks();
+  showToast('Price pack saved!','success');
+}
+
+async function deletePricePack(id) {
+  state.pricePacks = state.pricePacks.filter(p=>p.id!==id);
+  await saveState();
+  renderAdminPricing();
+  renderUserPacks();
+  renderLandingPacks();
+  showToast('Pack deleted.','info');
+}
+
+async function addPricePack() {
+  const icon = document.getElementById('new-pack-icon').value.trim()||'⚡';
+  const name = document.getElementById('new-pack-name').value.trim();
+  const credits = parseInt(document.getElementById('new-pack-credits').value)||1;
+  const price = parseInt(document.getElementById('new-pack-price').value)||499;
+  const badge = document.getElementById('new-pack-badge').value.trim();
+  const desc = document.getElementById('new-pack-desc').value.trim();
+  if (!name) { showToast('Enter pack name!','error'); return; }
+  state.pricePacks.push({ id:'p'+Date.now(), icon, name, desc, credits, price, badge, qrImage:null });
+  await saveState();
+  renderAdminPricing();
+  renderUserPacks();
+  renderLandingPacks();
+  showToast('Pack added!','success');
+}
+
+function renderLandingPacks() {
+  const container = document.getElementById('landing-price-list');
+  if (!container) return;
+  container.innerHTML = state.pricePacks.map(p => `
+    <div class="credit-card${p.badge?' best':''}" onclick="showAuth('register')">
+      <div class="cc-left"><div class="cc-icon">${p.icon}</div><div><div class="cc-name">${p.name}</div><div class="cc-desc">${p.desc||''}</div></div></div>
+      <div class="cc-right"><div class="cc-price">₹${p.price.toLocaleString()}</div></div>
+      ${p.badge?`<div class="best-tag">${p.badge}</div>`:''}
+    </div>
+  `).join('');
+}
+
+function renderUserPacks() {
+  const container = document.querySelector('.credits-scroll');
+  if (!container) return;
+  container.innerHTML = state.pricePacks.map(p => `
+    <div class="credit-card${p.badge?' best':''}" onclick="openBuyModal(${p.credits},${p.price},'${p.id}')">
+      <div class="cc-left"><div class="cc-icon">${p.icon}</div><div><div class="cc-name">${p.name}</div><div class="cc-desc">${p.desc||''}</div></div></div>
+      <div class="cc-right"><div class="cc-price">₹${p.price.toLocaleString()}</div><div class="cc-buy">TAP TO BUY</div></div>
+      ${p.badge?`<div class="best-tag">${p.badge}</div>`:''}
+    </div>
+  `).join('');
+}
+
+function renderAdminBots() {
+  const list = document.getElementById('admin-bots-list');
+  const bots = Object.values(state.bots);
+  if (!bots.length) { list.innerHTML='<div class="empty-state"><div class="e-icon">🤖</div>No bot activity yet.</div>'; return; }
+
+  const sorted = [...bots].sort((a,b) => (a.approved===b.approved?0:(a.approved?1:-1)));
+
+  list.innerHTML = sorted.map(b => {
+    const { status, pct, msLeft } = getBotStatus(b);
+    const ownerCredits = state.users[b.owner] ? state.users[b.owner].credits : '—';
+
+    if (!b.approved && !b.rejected) {
+      return `
+      <div class="bot-editor-card">
+        <div class="be-header">
+          <div class="be-logo">⏳</div>
+          <div>
+            <div class="be-name">${b.guildName} <span class="status-badge pending" style="font-size:10px;padding:2px 8px">PENDING APPROVAL</span></div>
+            <div class="be-owner">Owner: @${b.owner} (${ownerCredits} CR left) · UID: ${b.uid} · Server: ${b.server}</div>
+            <div class="be-owner">Requested: ${new Date(b.requestTime).toLocaleString()} · Goal: ${parseInt(b.goal).toLocaleString()}</div>
+          </div>
+        </div>
+        <div class="order-actions" style="margin-top:10px">
+          <button class="btn-approve" onclick="approveBotRequest('${b.id}')">✅ Approve Launch</button>
+          <button class="btn-reject" onclick="rejectBotRequest('${b.id}')">❌ Reject (refund credit)</button>
+        </div>
+      </div>`;
+    }
+
+    const statusSelect = b.rejected ? 'REJECTED' : status;
+    return `
+    <div class="bot-editor-card">
+      <div class="be-header">
+        <div class="be-logo">${b.emoji||'⚔️'}</div>
+        <div>
+          <div class="be-name">${b.guildName} <span class="status-badge ${status==='ACTIVE LIVE'?'live':status==='OFFLINE'?'offline':status==='STARTING SOON'?'pending':'expired'}" style="font-size:10px;padding:2px 8px">${status}${status==='STARTING SOON'?' ('+fmtCountdown(msLeft)+')':''}</span></div>
+          <div class="be-owner">Owner: @${b.owner} · UID: ${b.uid} · Server: ${b.server}</div>
+          <div class="be-owner">Requested: ${new Date(b.requestTime).toLocaleString()}${b.approvedTime?' · Approved: '+new Date(b.approvedTime).toLocaleString():''}</div>
+        </div>
+      </div>
+      ${b.rejected ? '' : `
+      <div class="be-form">
+        <div class="be-field span2"><label>GUILD NAME</label><input type="text" value="${b.guildName}" onchange="updateBot('${b.id}','guildName',this.value)"></div>
+        <div class="be-field"><label>EMOJI / LOGO</label><input type="text" value="${b.emoji}" onchange="updateBot('${b.id}','emoji',this.value)" style="font-size:20px;text-align:center"></div>
+        <div class="be-field"><label>LEVEL</label><input type="number" value="${b.level}" onchange="updateBot('${b.id}','level',parseInt(this.value))"></div>
+        <div class="be-field"><label>GLORY GAINED</label><input type="number" value="${b.glory}" onchange="updateBot('${b.id}','glory',parseInt(this.value))"></div>
+        <div class="be-field"><label>TOTAL SCORE</label><input type="number" value="${b.score}" onchange="updateBot('${b.id}','score',parseInt(this.value))"></div>
+        <div class="be-field"><label>MEMBERS</label><input type="number" value="${b.members}" onchange="updateBot('${b.id}','members',parseInt(this.value))"></div>
+        <div class="be-field"><label>PROGRESS %</label><input type="number" min="0" max="100" value="${Math.round(pct)}" onchange="updateBot('${b.id}','overridePct',parseInt(this.value))"></div>
+        <div class="be-field span2"><label>BOT STATUS</label>
+          <select onchange="updateBot('${b.id}','overrideStatus',this.value)">
+            <option ${statusSelect==='ACTIVE LIVE'?'selected':''}>ACTIVE LIVE</option>
+            <option ${statusSelect==='OFFLINE'?'selected':''}>OFFLINE</option>
+            <option ${statusSelect==='EXPIRED'?'selected':''}>EXPIRED</option>
+          </select>
+        </div>
+      </div>
+      <button class="btn-save" onclick="saveBot('${b.id}')">💾 Save Changes</button>`}
+    </div>
+  `;}).join('');
+}
+
+function updateBot(id, key, val) { if(state.bots[id]) { state.bots[id][key] = val; saveState(); } }
+async function saveBot(id) {
+  await saveState();
+  renderAdminBots();
+  if (currentUser) refreshUserDash();
+  showToast('Bot updated!','success');
+}
+
+function renderAdminCoupons() {
+  const list = document.getElementById('admin-coupons-list');
+  const keys = Object.keys(state.coupons);
+  if (!keys.length) { list.innerHTML='<div class="empty-state"><div class="e-icon">🎟️</div>No coupons yet.</div>'; return; }
+  list.innerHTML = keys.map(k => {
+    const c = state.coupons[k];
+    return `
+    <div class="coupon-list-item">
+      <div>
+        <div class="coupon-code">${k}</div>
+        <div class="coupon-credits">+${c.credits} Credits · Used ${c.uses}/${c.maxUses}</div>
+      </div>
+      <button class="btn-delete-coupon" onclick="deleteCoupon('${k}')">Delete</button>
+    </div>
+  `;}).join('');
+}
+
+function randomCoupon() {
+  const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  document.getElementById('new-coupon-code').value = Array.from({length:8},()=>chars[Math.floor(Math.random()*chars.length)]).join('');
+}
+
+async function createCoupon() {
+  const code = document.getElementById('new-coupon-code').value.trim().toUpperCase();
+  const credits = parseInt(document.getElementById('new-coupon-credits').value)||1;
+  const maxUses = parseInt(document.getElementById('new-coupon-uses').value)||100;
+  if (!code) { showToast('Enter coupon code!','error'); return; }
+  state.coupons[code] = { credits, maxUses, uses:0 };
+  await saveState();
+  renderAdminCoupons();
+  randomCoupon();
+  showToast(`Coupon ${code} created! Share it privately with the user.`,'success');
+}
+
+async function deleteCoupon(code) {
+  delete state.coupons[code];
+  await saveState();
+  renderAdminCoupons();
+  showToast('Coupon deleted.','info');
+}
+
+async function giveCreditByUsername() {
+  const un = document.getElementById('give-credit-username').value.trim();
+  const amt = parseInt(document.getElementById('give-credit-amount').value)||1;
+  if (!un) { showToast('Enter username!','error'); return; }
+  if (!state.users[un]) { showToast(`User @${un} not found!`,'error'); return; }
+  state.users[un].credits += amt;
+  await saveState();
+  renderCreditController();
+  showToast(`✅ ${amt} credits given to @${un}`,'success');
+  document.getElementById('give-credit-username').value = '';
+}
+
+function renderCreditController() {
+  const sel = document.getElementById('credit-user-select');
+  sel.innerHTML = Object.keys(state.users).map(u => `<option value="${u}">${u} (${state.users[u].credits} CR)</option>`).join('');
+  updateCreditDisplay();
+  sel.onchange = updateCreditDisplay;
+}
+
+function updateCreditDisplay() {
+  const un = document.getElementById('credit-user-select').value;
+  const u = state.users[un];
+  document.getElementById('credit-current-display').textContent = u ? u.credits + ' CR' : '—';
+}
+
+async function adjustCredits(mode) {
+  const un = document.getElementById('credit-user-select').value;
+  const amt = parseInt(document.getElementById('credit-amount').value)||1;
+  if (!state.users[un]) return;
+  if (mode==='add') state.users[un].credits += amt;
+  else state.users[un].credits = Math.max(0, state.users[un].credits - amt);
+  await saveState();
+  updateCreditDisplay();
+  renderCreditController();
+  showToast(`Credits updated for @${un}`,'success');
+}
+
+async function setCredits() {
+  const un = document.getElementById('credit-user-select').value;
+  const amt = parseInt(document.getElementById('credit-set-amount').value);
+  if (!state.users[un] || isNaN(amt)) return;
+  state.users[un].credits = Math.max(0, amt);
+  await saveState();
+  updateCreditDisplay();
+  renderCreditController();
+  showToast(`Set ${amt} credits for @${un}`,'success');
+}
+
+async function sendBroadcast() {
+  const text = document.getElementById('broadcast-text').value.trim();
+  if (!text) { showToast('Enter message!','error'); return; }
+  state.announcement = text;
+  await saveState();
+  showToast('Announcement sent to all users!','success');
+}
+async function clearBroadcast() {
+  state.announcement = '';
+  await saveState();
+  document.getElementById('broadcast-text').value = '';
+  showToast('Announcement cleared.','info');
+}
+async function setMaintenance(on) {
+  state.maintenance = on;
+  await saveState();
+  showToast(on ? '🔧 Maintenance mode ON':'✅ Maintenance mode OFF','info');
+}
+
+function handleLogoUpload(evt) {
+  const file = evt.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.siteLogo = e.target.result;
+    saveState();
+    renderLogoPreview();
+    applyLogoEverywhere();
+    showToast('Logo updated across the site!','success');
+  };
+  reader.readAsDataURL(file);
+}
+
+async function resetLogo() {
+  state.siteLogo = '⚡';
+  await saveState();
+  document.getElementById('logo-upload-input').value = '';
+  renderLogoPreview();
+  applyLogoEverywhere();
+  showToast('Logo reset to default.','info');
+}
+
+function renderLogoPreview() {
+  const p = document.getElementById('logo-preview');
+  if (!p) return;
+  p.innerHTML = state.siteLogo ? `<img src="${state.siteLogo}" style="width:100%;height:100%;object-fit:cover">` : '⚡';
+}
+
+function applyLogoEverywhere() {
+  const logo = state.siteLogo || '⚡';
+  const isImage = logo.startsWith('data:image');
+  const inner = isImage ? `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : logo;
+  document.querySelectorAll('.land-logo-icon').forEach(el => el.innerHTML = inner);
+  document.querySelectorAll('.auth-logo-box').forEach(el => {
+    if (el.id !== 'adminlogin-logo-box') el.innerHTML = inner;
+  });
+  const dashIcon = document.querySelector('.dash-logo-icon');
+  if (dashIcon) dashIcon.innerHTML = inner;
+  const bootLogo = document.querySelector('#boot-loading div');
+  if (bootLogo) bootLogo.innerHTML = isImage ? `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:10px">` : logo;
+  document.querySelectorAll('.home-btn').forEach(el => {
+    if (isImage) {
+      el.innerHTML = `<img src="${logo}" style="width:32px;height:32px;object-fit:cover;border-radius:50%;border:2px solid var(--blue)">`;
+    } else {
+      el.innerHTML = logo;
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  UTILITIES
+// ─────────────────────────────────────────────────────────────────────────────
+function genId() { return Math.random().toString(36).slice(2,9).toUpperCase(); }
+
+function showToast(msg, type='info') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  setTimeout(()=>{ t.classList.remove('show'); }, 2800);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
+  await loadState();
+  renderLandingPacks();
+  applyLogoEverywhere();
+  // Check if user is already logged in (via session)
+  try {
+    const data = await apiFetch('/api/current-user');
+    if (data.username) {
+      currentUser = data.username;
+      if (data.role === 'admin') {
+        showAdminPanel();
+      } else {
+        showUserDash();
+      }
+    }
+  } catch(e) {}
+  // periodic refresh for bot status (user)
+  setInterval(() => {
+    if (currentUser) {
+      const u = state.users[currentUser];
+      if (u && u.role === 'user' && document.getElementById('userdash').classList.contains('active')) {
+        if (currentUserTab === 'home') renderBotCard();
+        if (currentUserTab === 'bots') renderBotLaunches();
+      }
+      if (u && (u.role === 'admin' || u.role === 'admin2') && document.getElementById('adminpanel').classList.contains('active') && currentAdminTab === 'bots') {
+        renderAdminBots();
+      }
+    }
+  }, 15000);
+});
+</script>
+</body>
+</html>
