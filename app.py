@@ -345,7 +345,7 @@ def save_state():
 # ════════════════════════════════════════════════════════════════════════
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
-BOT_TOKEN = "8988271223:AAE-a8hqAYOrCMZzSEaNu4WftONuc9CB6Ig"
+BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
 OWNERS = [8703570301, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
@@ -674,4 +674,5 @@ bot_thread = threading.Thread(target=run_bot, daemon=True)
 bot_thread.start()
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
