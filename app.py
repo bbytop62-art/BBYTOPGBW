@@ -330,7 +330,7 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8703570301, 8726156194]
+OWNERS = [8703570301, 8726156194, 8078228501]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
