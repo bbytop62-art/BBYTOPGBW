@@ -13,7 +13,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 import threading
 
 # Resend API Key 
-resend.api_key = "re_4YFgpX1E_5PPY3WjF1JA6HcyjkGM6xVD9"
+resend.api_key = "re_bahruaUX_DoAGu2SYXkmgPNbMB3E8zUuL"
 
 app = Flask(__name__)
 app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
