@@ -13,7 +13,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 import threading
 
 # Resend API Key 
-resend.api_key = "re_Use1fV2g_7uP3F5e7EMjXGyBZ6nFf19wV"
+resend.api_key = "re_4YFgpX1E_5PPY3WjF1JA6HcyjkGM6xVD9"
 
 app = Flask(__name__)
 app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
@@ -136,7 +136,7 @@ def send_otp():
     # Send OTP via Resend
     try:
         resend.Emails.send({
-            "from": "info@glorybot.pro", 
+            "from": "onboarding@resend.dev", 
             "to": email,
             "subject": "Your GLORY BOT PRO Verification Code",
             "html": f"<strong>Verification Code: {otp}</strong><br><br>This code is valid for 5 minutes. Do not share it with anyone."
