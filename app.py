@@ -427,9 +427,8 @@ def handle_text(message):
         
     elif text == "📞 Contact Owner":
         markup = InlineKeyboardMarkup()
-        markup.add(InlineKeyboardButton("Contact Owner 1", url="https://t.me/KESHVEXFF"))
-        markup.add(InlineKeyboardButton("Contact Owner 2", url="https://t.me/ydv_codex"))
-        markup.add(InlineKeyboardButton("Contact Owner 3 (BBYTOP3)", url="https://t.me/BBYTOP3"))
+        markup.add(InlineKeyboardButton("👑 Owner - YDV", url="https://t.me/ydv_codex"))
+        markup.add(InlineKeyboardButton("👑 Owner - BBYTOP3", url="https://t.me/BBYTOP3"))
         bot.send_message(cid, "Select an owner to contact:", reply_markup=markup)
         
     elif text == "👑 Owner Panel" and cid in OWNERS:
@@ -674,5 +673,5 @@ bot_thread = threading.Thread(target=run_bot, daemon=True)
 bot_thread.start()
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
