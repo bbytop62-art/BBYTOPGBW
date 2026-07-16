@@ -13,7 +13,7 @@ from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeybo
 import threading
 
 # Resend API Key 
-resend.api_key = "re_bahruaUX_DoAGu2SYXkmgPNbMB3E8zUuL"
+resend.api_key = "re_Use1fV2g_7uP3F5e7EMjXGyBZ6nFf19wV"
 
 app = Flask(__name__)
 app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
@@ -114,39 +114,6 @@ def get_private_data():
     # Return full state (frontend will use it)
     return jsonify(STATE)
 
-@app.route('/api/send-otp', methods=['POST'])
-def send_otp():
-    data = request.json
-    email = data.get('email')
-    if not email:
-        return jsonify({"error": "Email is required"}), 400
-        
-    clean_expired_codes() 
-    
-    # आसान 6-digit OTP
-    otp = str(random.randint(100000, 999999))
-    
-    codes = load_codes()
-    codes[email] = {
-        "otp": otp,
-        "timestamp": time.time()
-    }
-    save_codes(codes)
-    
-    # Send OTP via Resend
-    try:
-        resend.Emails.send({
-            "from": "onboarding@resend.dev", 
-            "to": email,
-            "subject": "Your GLORY BOT PRO Verification Code",
-            "html": f"<strong>Verification Code: {otp}</strong><br><br>This code is valid for 5 minutes. Do not share it with anyone."
-        })
-    except Exception as e:
-        print(f"OTP Email failed: {e}")
-        return jsonify({"error": "Failed to send email"}), 500
-        
-    # हम रिस्पांस में OTP नहीं भेज रहे हैं, ताकि कोई F12 दबाकर नेटवर्क टैब में कोड ना देख सके
-    return jsonify({"success": True, "message": "OTP sent successfully"})
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -154,39 +121,14 @@ def register():
     username = data.get('username')
     password = data.get('password')
     email = data.get('email')
-    otp_provided = data.get('otp')
     
-    if not username or not password or not email or not otp_provided:
+    if not username or not password or not email:
         return jsonify({"error": "Missing fields"}), 400
         
     if username in STATE['users']:
         return jsonify({"error": "Username already exists"}), 400
         
-    clean_expired_codes()
-    codes = load_codes()
-    
-    # OTP वेरीफाई करना
-    if email not in codes:
-        return jsonify({"error": "No OTP requested or OTP has expired (5 mins)"}), 400
-        
-    if codes[email]['otp'] != otp_provided:
-        return jsonify({"error": "Invalid OTP"}), 400
-        
-    # अगर OTP सही है, तो अकाउंट बना दो
-    STATE['users'][username] = {
-        "username": username,
-        "email": email,
-        "password": password,
-        "credits": 0,
-        "role": "user",
-        "banned": False
-    }
-    
-    # इस्तेमाल होने के बाद कोड को फाइल से डिलीट कर दो
-    del codes[email]
-    save_codes(codes)
-    
-    # Welcome Email
+        # Welcome Email
     try:
         resend.Emails.send({
             "from": "info@glorybot.pro", 
@@ -331,16 +273,58 @@ def upload_payment_proof():
     })
 
     return jsonify({"success": True})   
-@app.route('/api/save-state', methods=['POST'])         
+@app.route('/api/save-state', methods=['POST'])
 @login_required
 def save_state():
+    current = STATE['users'].get(session['username'])
+    if not current or current['role'] not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
     data = request.json
-    allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
+    allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo', 'users']
     for key in allowed_keys:
         if key in data:
-            STATE[key] = data[key]
+            if key == 'users':
+                incoming = data[key]
+                for uname, udata in incoming.items():
+                    existing = STATE['users'].get(uname, {})
+                    # Staff cannot modify admin accounts
+                    if existing.get('role') == 'admin' and current['role'] == 'staff':
+                        continue
+                    # Preserve password if not sent
+                    if 'password' not in udata:
+                        udata['password'] = existing.get('password', '')
+                    STATE['users'][uname] = udata
+            else:
+                STATE[key] = data[key]
     return jsonify({"success": True})
 
+
+
+@app.route('/api/admin/set-role', methods=['POST'])
+@login_required
+def admin_set_role():
+    current = STATE['users'].get(session['username'])
+    if not current or current['role'] not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
+    data = request.json
+    target_username = data.get('username')
+    new_role = data.get('role')
+    if new_role not in ('user', 'staff', 'admin'):
+        return jsonify({"error": "Invalid role"}), 400
+    target = STATE['users'].get(target_username)
+    if not target:
+        return jsonify({"error": "User not found"}), 404
+    # Staff cannot modify admin accounts
+    if current['role'] == 'staff' and target['role'] == 'admin':
+        return jsonify({"error": "Staff cannot modify admin accounts"}), 403
+    # Only admin can promote to admin
+    if new_role == 'admin' and current['role'] != 'admin':
+        return jsonify({"error": "Only admin can grant admin role"}), 403
+    # Only admin can demote admin
+    if target['role'] == 'admin' and current['role'] != 'admin':
+        return jsonify({"error": "Only admin can modify admin accounts"}), 403
+    target['role'] = new_role
+    return jsonify({"success": True, "role": new_role})
 
 # ════════════════════════════════════════════════════════════════════════
 # 🤖 TELEGRAM BOT INTEGRATION
