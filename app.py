@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request, session, send_from_directory
+from flask import Flask, jsonify, render_template, request, session
 from functools import wraps
 import uuid
 from datetime import datetime
@@ -11,15 +11,15 @@ import requests
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, KeyboardButton
 import threading
-from threading import Lock
 
-# ─── CONFIG ───────────────────────────────────────────────────────────────────
+# Resend API Key 
 resend.api_key = "re_Use1fV2g_7uP3F5e7EMjXGyBZ6nFf19wV"
 
 app = Flask(__name__)
-app.secret_key = "ydv-glory-simple-key"
+app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
 
-# ─── UPI / FAMPAY CONFIG ──────────────────────────────────────────────────────
+# ─── UPI CONFIG ───────────────────────────────────────────
+# ─── FAMPAY CONFIG ───────────────────────────────────────────
 FAMPAY_API_KEY = "FAM_abcf6524d550262d3905933b996806dcc952cfa5ec131d82"
 UPI_ID = "adityahere777@fam"
 PAYEE_NAME = "Aditya"
@@ -29,14 +29,8 @@ PAYEE_NUMBER = "7004973360"
 FAMPAY_QR_API = "https://fampay.anujbots.xyz/qr.php"
 FAMPAY_VERIFY_API = "https://fampay.anujbots.xyz/verify.php"
 
-# ─── FILE PATHS ───────────────────────────────────────────────────────────────
-DATA_DIR = 'data'
-STATE_FILE = os.path.join(DATA_DIR, 'state.json')
-CODE_FILE = os.path.join(DATA_DIR, 'code.json')
-UPLOADS_DIR = 'uploads'
-
-# ─── INITIAL DEFAULT STATE ────────────────────────────────────────────────────
-DEFAULT_STATE = {
+# ─── STATE (Backend only) ────────────────────────────────────────────────────
+STATE = {
     "users": {
         "YDV-ROOT": {
             "username": "YDV-ROOT",
@@ -61,46 +55,47 @@ DEFAULT_STATE = {
     ],
     "announcement": "⚡ Welcome to GLORY BOT PRO — 24/7 bots running NON-STOP!",
     "maintenance": False,
-    "siteLogo": "⚡",
-    "tg_users": {}
+    "siteLogo": "⚡"   # Simple emoji, no base64
 }
 
-# ─── STATE MANAGEMENT WITH FILE PERSISTENCE ───────────────────────────────────
-state_lock = Lock()
+STATE_FILE = "state_db.json"
 
 def load_state():
-    """Load state from JSON file, create with defaults if not exists"""
-    os.makedirs(DATA_DIR, exist_ok=True)
-    if not os.path.exists(STATE_FILE):
-        save_state(DEFAULT_STATE)
-        return DEFAULT_STATE.copy()
-    try:
-        with open(STATE_FILE, 'r') as f:
-            return json.load(f)
-    except (json.JSONDecodeError, IOError):
-        print("⚠️ State file corrupted, creating new one")
-        save_state(DEFAULT_STATE)
-        return DEFAULT_STATE.copy()
-
-def save_state(state=None):
-    """Save state to JSON file with thread safety"""
-    if state is None:
-        state = STATE
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with state_lock:
+    global STATE
+    if os.path.exists(STATE_FILE):
         try:
-            # Atomic write: write to temp file then rename
-            temp_file = STATE_FILE + '.tmp'
-            with open(temp_file, 'w') as f:
-                json.dump(state, f, indent=2, default=str)
-            os.replace(temp_file, STATE_FILE)  # Atomic operation
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                # Update current state keys
+                for k, v in loaded.items():
+                    STATE[k] = v
+            print("Successfully loaded state from file.")
         except Exception as e:
-            print(f"❌ Failed to save state: {e}")
+            print(f"Error loading state from file: {e}")
+    else:
+        # Save initial state
+        try:
+            with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                json.dump(STATE, f, indent=4)
+            print("Created initial state file.")
+        except Exception as e:
+            print(f"Error creating initial state file: {e}")
 
-# Initialize STATE from file
-STATE = load_state()
+def save_state_to_file():
+    try:
+        tmp_file = STATE_FILE + '.tmp'
+        with open(tmp_file, 'w', encoding='utf-8') as f:
+            json.dump(STATE, f, indent=4)
+        os.replace(tmp_file, STATE_FILE)
+    except Exception as e:
+        print(f"Error saving state to file: {e}")
 
-# ─── CODE MANAGEMENT (OTP/Verification codes) ────────────────────────────────
+# Load state on startup
+load_state()
+
+# ─── HELPERS ──────────────────────────────────────────────────────────────────
+CODE_FILE = 'code.json'
+
 def load_codes():
     if not os.path.exists(CODE_FILE):
         return {}
@@ -111,17 +106,16 @@ def load_codes():
         return {}
 
 def save_codes(codes):
-    os.makedirs(DATA_DIR, exist_ok=True)
     with open(CODE_FILE, 'w') as f:
         json.dump(codes, f)
 
 def clean_expired_codes():
     codes = load_codes()
     current_time = time.time()
+    # जो कोड 5 मिनट (300 सेकंड) से पुराने हैं, उन्हें डिलीट कर दो
     codes = {email: data for email, data in codes.items() if current_time - data['timestamp'] < 300}
     save_codes(codes)
 
-# ─── HELPERS ──────────────────────────────────────────────────────────────────
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -130,37 +124,9 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-def admin_required(f):
-    """Decorator for admin/staff only endpoints"""
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if 'username' not in session:
-            return jsonify({"error": "Unauthorized"}), 401
-        user = STATE['users'].get(session['username'])
-        if not user or user['role'] not in ('admin', 'staff'):
-            return jsonify({"error": "Forbidden"}), 403
-        return f(*args, **kwargs)
-    return decorated
-
-def add_credits_safe(username, amount):
-    """Safely add credits with persistence"""
-    if username in STATE['users']:
-        STATE['users'][username]['credits'] = max(0, STATE['users'][username].get('credits', 0) + amount)
-        save_state(STATE)
-        return True
-    return False
-
-def deduct_credits_safe(username, amount):
-    """Safely deduct credits with persistence"""
-    if username in STATE['users']:
-        current = STATE['users'][username].get('credits', 0)
-        if current >= amount:
-            STATE['users'][username]['credits'] = current - amount
-            save_state(STATE)
-            return True
-    return False
-
 # ─── ROUTES ──────────────────────────────────────────────────────────────────
+
+from flask import send_from_directory
 
 @app.route('/')
 def home():
@@ -168,32 +134,21 @@ def home():
 
 @app.route('/video.mp4')
 def serve_video():
+    # यह app.py वाले फोल्डर से सीधा video.mp4 को फ्रंटएंड में भेज देगा
     return send_from_directory('.', 'video.mp4')
 
 @app.route('/uploads/<filename>')
 def serve_uploads(filename):
-    return send_from_directory(UPLOADS_DIR, filename)
+    return send_from_directory('uploads', filename)
 
 # ─── PUBLIC API ─────────────────────────────────────────────────────────────
 
+
 @app.route('/api/get-private-data', methods=['GET'])
 def get_private_data():
-    # Return only necessary public data, not full state
-    public_data = {
-        "pricePacks": STATE.get('pricePacks', []),
-        "announcement": STATE.get('announcement', ''),
-        "maintenance": STATE.get('maintenance', False),
-        "siteLogo": STATE.get('siteLogo', '⚡'),
-        "coupons": STATE.get('coupons', {}),
-        "bots": STATE.get('bots', {})
-    }
-    return jsonify(public_data)
-
-@app.route('/api/get-full-state', methods=['GET'])
-@admin_required
-def get_full_state():
-    """Admin only - returns complete state"""
+    # Return full state (frontend will use it)
     return jsonify(STATE)
+
 
 @app.route('/api/register', methods=['POST'])
 def register():
@@ -208,7 +163,7 @@ def register():
     if username in STATE['users']:
         return jsonify({"error": "Username already exists"}), 400
 
-    # Save user to state AND persist
+    # Save user to state
     STATE['users'][username] = {
         "username": username,
         "password": password,
@@ -217,9 +172,9 @@ def register():
         "role": "user",
         "banned": False
     }
-    save_state(STATE)  # ✅ PERSIST IMMEDIATELY
+    save_state_to_file()
 
-    # Welcome Email (non-blocking)
+    # Welcome Email (optional — won't block registration if it fails)
     try:
         resend.Emails.send({
             "from": "info@glorybot.pro",
@@ -243,52 +198,12 @@ def login():
     if user['banned']:
         return jsonify({"error": "Account banned"}), 403
     session['username'] = username
-    return jsonify({"success": True, "role": user['role'], "credits": user.get('credits', 0)})
+    return jsonify({"success": True, "role": user['role']})
 
 @app.route('/api/logout', methods=['POST'])
 def logout():
     session.pop('username', None)
     return jsonify({"success": True})
-
-@app.route('/api/current-user', methods=['GET'])
-def current_user():
-    if 'username' in session:
-        user = STATE['users'].get(session['username'])
-        if user:
-            return jsonify({
-                "username": session['username'],
-                "role": user['role'],
-                "credits": user.get("credits", 0),
-                "email": user.get("email", "")
-            })
-    return jsonify({"error": "Not logged in"}), 401
-
-@app.route('/api/update-credits', methods=['POST'])
-@login_required
-def update_credits():
-    """
-    ✅ SAFE CREDIT UPDATE - Called by frontend after payment verification
-    Only allows ADDING credits, never deducting via this endpoint
-    """
-    data = request.json
-    username = data.get('username')
-    amount = int(data.get('amount', 0))
-    
-    # Security: Only admin can update other users
-    current_user = STATE['users'].get(session['username'])
-    if username != session['username'] and current_user['role'] not in ('admin', 'staff'):
-        return jsonify({"error": "Forbidden"}), 403
-    
-    if amount <= 0:
-        return jsonify({"error": "Amount must be positive"}), 400
-    
-    if add_credits_safe(username, amount):
-        return jsonify({
-            "success": True,
-            "username": username,
-            "new_credits": STATE['users'][username]['credits']
-        })
-    return jsonify({"error": "User not found"}), 404
 
 @app.route("/api/fampay/create", methods=["POST"])
 @login_required
@@ -327,6 +242,19 @@ def create_fampay_payment():
             "success": False,
             "message": str(e)
         }), 500
+@app.route('/api/current-user', methods=['GET'])        
+def current_user():
+    if 'username' in session:
+        user = STATE['users'].get(session['username'])
+        if user:
+            return jsonify({
+                "username": session['username'],
+                "role": user['role'],
+                "credits": user.get("credits", 0)
+            })
+    return jsonify({"error": "Not logged in"}), 401
+
+
 
 @app.route("/api/fampay/verify/<order_id>", methods=["GET"])
 @login_required
@@ -345,26 +273,6 @@ def verify_fampay_payment(order_id):
 
         if res.get("status") == "success":
             data = res["data"]
-            # ✅ Automatically add credits on successful payment
-            credits_to_add = 0
-            for pack in STATE.get('pricePacks', []):
-                if pack['price'] == int(data['amount']):
-                    credits_to_add = pack['credits']
-                    break
-            
-            if credits_to_add > 0:
-                add_credits_safe(session['username'], credits_to_add)
-                # Save order record
-                STATE['orders'].append({
-                    "id": order_id,
-                    "username": session['username'],
-                    "credits": credits_to_add,
-                    "price": int(data['amount']),
-                    "utr": data['utr'],
-                    "status": "completed",
-                    "ts": int(time.time() * 1000)
-                })
-                save_state(STATE)
 
             return jsonify({
                 "verified": True,
@@ -372,8 +280,7 @@ def verify_fampay_payment(order_id):
                 "utr": data["utr"],
                 "sender": data["sender_name"],
                 "amount": data["amount"],
-                "payment_time": data["payment_time_ist"],
-                "credits_added": credits_to_add
+                "payment_time": data["payment_time_ist"]
             })
 
         return jsonify({
@@ -386,7 +293,6 @@ def verify_fampay_payment(order_id):
             "verified": False,
             "message": str(e)
         }), 500
-
 @app.route("/api/fampay/upload", methods=["POST"])
 @login_required
 def upload_payment_proof():
@@ -394,13 +300,13 @@ def upload_payment_proof():
         return jsonify({"success": False, "message": "Screenshot required"}), 400
 
     screenshot = request.files["screenshot"]
-    os.makedirs(UPLOADS_DIR, exist_ok=True)
+    os.makedirs("uploads", exist_ok=True)
 
     filename = f"{uuid.uuid4().hex}_{screenshot.filename}"
-    path = os.path.join(UPLOADS_DIR, filename)
+    path = os.path.join("uploads", filename)
     screenshot.save(path)
 
-    order_data = {
+    STATE["orders"].append({
         "id": str(uuid.uuid4()),
         "username": session["username"],
         "order_id": request.form.get("order_id"),
@@ -410,131 +316,163 @@ def upload_payment_proof():
         "screenshot_path": path,
         "status": "pending",
         "ts": int(time.time() * 1000)
-    }
-    
-    STATE["orders"].append(order_data)
-    save_state(STATE)  # ✅ PERSIST
+    })
+    save_state_to_file()
 
-    return jsonify({"success": True, "order": order_data})
-
+    return jsonify({"success": True})   
 @app.route('/api/save-state', methods=['POST'])
-@admin_required
-def save_state_endpoint():
-    """
-    ✅ FIXED: Now properly saves state to file
-    Only admin/staff can use this
-    """
+@login_required
+def save_state():
+    current = STATE['users'].get(session['username'])
+    if not current:
+        return jsonify({"error": "Forbidden"}), 403
     data = request.json
-    allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 
-                    'announcement', 'maintenance', 'siteLogo', 'tg_users']
     
-    with state_lock:
+    current_username = session['username']
+    
+    if current['role'] in ('admin', 'staff'):
+        # Admin or staff can modify all allowed keys, including 'users'
+        allowed_keys = ['users', 'orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
         for key in allowed_keys:
             if key in data:
                 STATE[key] = data[key]
-        save_state(STATE)  # ✅ PERSIST TO FILE
-    
-    return jsonify({"success": True, "message": "State saved successfully"})
+        print(f"Admin/Staff {current_username} saved state.")
+    else:
+        # Regular user validation
+        user_data = STATE['users'].get(current_username)
+        if not user_data:
+            return jsonify({"error": "Forbidden"}), 403
+            
+        # 1. Process Bots
+        if 'bots' in data and isinstance(data['bots'], dict):
+            incoming_bots = data['bots']
+            
+            # Find deleted bots of this user
+            deleted_bids = []
+            for bid, bot in list(STATE['bots'].items()):
+                if bot.get('owner') == current_username:
+                    if bid not in incoming_bots:
+                        deleted_bids.append(bid)
+            
+            # Apply deletions
+            for bid in deleted_bids:
+                del STATE['bots'][bid]
+                print(f"Deleted bot {bid} for user {current_username}")
+                
+            # Process new/updated bots
+            for bid, bot in incoming_bots.items():
+                if not isinstance(bot, dict):
+                    continue
+                if bot.get('owner') != current_username:
+                    continue
+                    
+                # Is this a new bot launch?
+                if bid not in STATE['bots']:
+                    if user_data.get('credits', 0) >= 1:
+                        user_data['credits'] -= 1
+                        bot['id'] = bid
+                        bot['approved'] = False
+                        bot['rejected'] = False
+                        bot['glory'] = 0
+                        bot['score'] = 0
+                        STATE['bots'][bid] = bot
+                        print(f"New bot launch requested by {current_username}: deducted 1 credit. New credit balance: {user_data['credits']}")
+                    else:
+                        print(f"User {current_username} tried to launch bot {bid} but had insufficient credits.")
+                else:
+                    # Existing bot update (e.g. restart or other permitted changes)
+                    existing_bot = STATE['bots'][bid]
+                    for field in ['uid', 'server', 'guildName', 'emoji', 'level', 'members', 'goal', 'requestTime', 'startTime']:
+                        if field in bot:
+                            existing_bot[field] = bot[field]
+                    if bot.get('startTime') is not None:
+                        existing_bot['startTime'] = bot['startTime']
+                        existing_bot['overrideStatus'] = None
+                        existing_bot['overridePct'] = None
+                    print(f"Updated bot {bid} for user {current_username}")
+
+        # 2. Process Coupons (Redemption)
+        if 'redeemedBy' in data and 'coupons' in data:
+            incoming_redeemed = data['redeemedBy']
+            if isinstance(incoming_redeemed, dict):
+                for code, users_list in incoming_redeemed.items():
+                    if isinstance(users_list, list) and current_username in users_list:
+                        # Check if already redeemed in backend
+                        backend_redeemed = STATE.get('redeemedBy', {}).get(code, [])
+                        if current_username not in backend_redeemed:
+                            coupon = STATE.get('coupons', {}).get(code)
+                            if coupon and coupon.get('uses', 0) < coupon.get('maxUses', 100):
+                                coupon['uses'] = coupon.get('uses', 0) + 1
+                                if 'redeemedBy' not in STATE:
+                                    STATE['redeemedBy'] = {}
+                                if code not in STATE['redeemedBy']:
+                                    STATE['redeemedBy'][code] = []
+                                STATE['redeemedBy'][code].append(current_username)
+                                added_credits = coupon.get('credits', 0)
+                                user_data['credits'] = user_data.get('credits', 0) + added_credits
+                                print(f"Coupon {code} redeemed by {current_username}: +{added_credits} credits")
+
+    save_state_to_file()
+    return jsonify({"success": True})
+
 
 @app.route('/api/admin/update-user', methods=['POST'])
-@admin_required
+@login_required
 def admin_update_user():
     current = STATE['users'].get(session['username'])
+    if not current or current['role'] not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
     data = request.json
     target_username = data.get('username')
     target = STATE['users'].get(target_username)
-    
     if not target:
         return jsonify({"error": "User not found"}), 404
-    
     # Staff cannot modify admin accounts
     if current['role'] == 'staff' and target['role'] == 'admin':
         return jsonify({"error": "Staff cannot modify admin accounts"}), 403
-    
     if 'credits' in data:
         target['credits'] = max(0, int(data['credits']))
     if 'banned' in data:
         target['banned'] = bool(data['banned'])
-    
-    save_state(STATE)  # ✅ PERSIST
+    save_state_to_file()
     return jsonify({"success": True, "credits": target['credits'], "banned": target['banned']})
 
 @app.route('/api/admin/set-role', methods=['POST'])
-@admin_required
+@login_required
 def admin_set_role():
     current = STATE['users'].get(session['username'])
+    if not current or current['role'] not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
     data = request.json
     target_username = data.get('username')
     new_role = data.get('role')
-    
     if new_role not in ('user', 'staff', 'admin'):
         return jsonify({"error": "Invalid role"}), 400
-    
     target = STATE['users'].get(target_username)
     if not target:
         return jsonify({"error": "User not found"}), 404
-    
     # Staff cannot modify admin accounts
     if current['role'] == 'staff' and target['role'] == 'admin':
         return jsonify({"error": "Staff cannot modify admin accounts"}), 403
-    
     # Only admin can promote to admin
     if new_role == 'admin' and current['role'] != 'admin':
         return jsonify({"error": "Only admin can grant admin role"}), 403
-    
     # Only admin can demote admin
     if target['role'] == 'admin' and current['role'] != 'admin':
         return jsonify({"error": "Only admin can modify admin accounts"}), 403
-    
     target['role'] = new_role
-    save_state(STATE)  # ✅ PERSIST
+    save_state_to_file()
     return jsonify({"success": True, "role": new_role})
 
-@app.route('/api/admin/get-orders', methods=['GET'])
-@admin_required
-def admin_get_orders():
-    """Get all orders for admin panel"""
-    return jsonify({"orders": STATE.get('orders', [])})
-
-@app.route('/api/admin/approve-order', methods=['POST'])
-@admin_required
-def admin_approve_order():
-    """Approve a pending order and add credits"""
-    data = request.json
-    order_id = data.get('order_id')
-    
-    for order in STATE.get('orders', []):
-        if order['id'] == order_id and order['status'] == 'pending':
-            order['status'] = 'approved'
-            add_credits_safe(order['username'], order['credits'])
-            save_state(STATE)
-            return jsonify({"success": True, "order": order})
-    
-    return jsonify({"error": "Order not found or already processed"}), 404
-
-@app.route('/api/admin/reject-order', methods=['POST'])
-@admin_required
-def admin_reject_order():
-    """Reject a pending order"""
-    data = request.json
-    order_id = data.get('order_id')
-    
-    for order in STATE.get('orders', []):
-        if order['id'] == order_id and order['status'] == 'pending':
-            order['status'] = 'rejected'
-            save_state(STATE)
-            return jsonify({"success": True, "order": order})
-    
-    return jsonify({"error": "Order not found or already processed"}), 404
-
 # ════════════════════════════════════════════════════════════════════════
-# 🤖 TELEGRAM BOT INTEGRATION (with persistence fixes)
+# 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8703570301, 8726156194]
-bot = telebot.TeleBot(BOT_TOKEN, threaded=False)
+OWNERS = [8078228501, 8726156194]
+bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
+    # Added @glorybothelp to the list
     channels = ["@keshvexffmethod", "@glorybotpro", "@glorybothelp"]
     for ch in channels:
         try:
@@ -542,13 +480,14 @@ def check_sub(user_id):
             if status in ['left', 'kicked']:
                 return False
         except:
-            pass
+            pass # Fail safe agar bot channel ka admin nahi hai
     return True
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
     markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/keshvexffmethod"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
+    # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
     markup.add(InlineKeyboardButton("✅ Joined", callback_data="check_joined"))
     return markup
@@ -568,11 +507,9 @@ def start_cmd(message):
         bot.send_message(cid, "Please join our official channels to use the bot!", reply_markup=sub_markup())
         return
         
-    if "tg_users" not in STATE:
-        STATE["tg_users"] = {}
+    if "tg_users" not in STATE: STATE["tg_users"] = {}
     if str(cid) not in STATE["tg_users"]:
         STATE["tg_users"][str(cid)] = {"balance": 0}
-        save_state(STATE)  # ✅ PERSIST NEW TG USER
         
     bot.send_message(cid, "Welcome to GLORY BOT PRO Bot! ⚡\nChoose an option below:", reply_markup=main_menu(cid))
 
@@ -585,11 +522,9 @@ def handle_text(message):
         bot.send_message(cid, "Please join our channels first!", reply_markup=sub_markup())
         return
 
-    if "tg_users" not in STATE:
-        STATE["tg_users"] = {}
+    if "tg_users" not in STATE: STATE["tg_users"] = {}
     if str(cid) not in STATE["tg_users"]:
         STATE["tg_users"][str(cid)] = {"balance": 0}
-        save_state(STATE)
 
     if text == "💰 Check Balance":
         bal = STATE["tg_users"][str(cid)]["balance"]
@@ -601,6 +536,7 @@ def handle_text(message):
         
     elif text == "🚀 Credit Guild Glory Bot":
         bal = STATE["tg_users"][str(cid)]["balance"]
+        # Auto sync price with website's starter pack (if price changes on site, it changes here too)
         starter_price = int(STATE["pricePacks"][0]["price"]) if STATE["pricePacks"] else 499
         
         if bal < starter_price:
@@ -620,15 +556,13 @@ def handle_text(message):
     elif text == "👑 Owner Panel" and cid in OWNERS:
         markup = InlineKeyboardMarkup()
         markup.add(InlineKeyboardButton("➕ Add Credit to Any User", callback_data="admin_add_credit"))
-        markup.add(InlineKeyboardButton("📊 View All Orders", callback_data="admin_view_orders"))
         bot.send_message(cid, "👑 Welcome to the Owner Panel:", reply_markup=markup)
 
 def process_add_balance(message):
     cid = message.chat.id
     try:
         amt = int(message.text)
-        if amt < 1:
-            raise ValueError
+        if amt < 1: raise ValueError
     except:
         bot.send_message(cid, "Invalid amount. Please click 'Add Balance' and try again with a valid number.")
         return
@@ -636,9 +570,13 @@ def process_add_balance(message):
     try:
         r = requests.get(
             FAMPAY_QR_API,
-            params={"upi": UPI_ID, "amount": amt},
+            params={
+                "upi": UPI_ID,
+                "amount": amt
+            },
             timeout=20
         )
+
         data = r.json()
 
         if data.get("status") != "success":
@@ -658,7 +596,10 @@ def process_add_balance(message):
                 f"After completing the payment, wait for auto-verification.")
     
     bot.send_photo(cid, qr_url, caption=msg_text, parse_mode="Markdown")
-    bot.send_message(cid, "⏳ Waiting for auto verification...\nPlease don't close the bot.")
+    bot.send_message(
+        cid,
+        "⏳ Waiting for auto verification...\nPlease don't close the bot."
+    )
 
     threading.Thread(
         target=wait_for_payment_verification,
@@ -668,20 +609,25 @@ def process_add_balance(message):
 
 def wait_for_payment_verification(cid, order_id, amt):
     attempts = 0
-    while attempts < 60:
+    while attempts < 60: # Poll for 5 mins
         try:
             verify = requests.get(
                 FAMPAY_VERIFY_API,
-                params={"order_id": order_id, "api_key": FAMPAY_API_KEY},
+                params={
+                    "order_id": order_id,
+                    "api_key": FAMPAY_API_KEY
+                },
                 timeout=15
             ).json()
 
             if verify.get("status") == "success":
                 data = verify["data"]
+
                 bot.send_message(
                     cid,
                     f"✅ Payment Verified Successfully!\n💰 Amount: ₹{data['amount']}\n🔖 UTR: `{data['utr']}`\n\n📷 **Please send your payment screenshot** for admin approval."
                 )
+
                 msg = bot.send_message(cid, "Upload screenshot now.")
                 bot.register_next_step_handler(
                     msg,
@@ -718,8 +664,7 @@ def process_payment_screenshot(message, order_id, amt, utr):
     for owner in OWNERS:
         try:
             bot.send_photo(owner, file_info.file_id, caption=caption_text, parse_mode="Markdown", reply_markup=markup)
-        except:
-            pass
+        except: pass
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_query(call):
@@ -731,66 +676,39 @@ def handle_query(call):
             bot.delete_message(cid, call.message.message_id)
             bot.send_message(cid, "Welcome to GLORY BOT PRO Bot! ⚡", reply_markup=main_menu(cid))
         else:
-            bot.answer_callback_query(call.id, "You haven't joined all channels yet! ❌", show_alert=True)
+            bot.answer_callback_query(call.id, "You haven't joined both channels yet! ❌", show_alert=True)
             
     elif call.data.startswith("apptg_"):
         parts = call.data.split("_")
         target_cid = parts[1]
         amt = int(parts[2])
         
-        # ✅ FIXED: Persist balance update
-        if "tg_users" not in STATE:
-            STATE["tg_users"] = {}
-        if str(target_cid) not in STATE["tg_users"]:
-            STATE["tg_users"][str(target_cid)] = {"balance": 0}
-        
         STATE["tg_users"][str(target_cid)]["balance"] += amt
-        save_state(STATE)  # ✅ PERSIST
-        
+        save_state_to_file()
         bot.edit_message_text(f"✅ Approved. ₹{amt} added to TG ID {target_cid}.", cid, call.message.message_id)
         try:
             bot.send_message(target_cid, f"✅ **Payment Verified & Approved!**\n₹{amt} has been added to your bot balance.", parse_mode="Markdown")
-        except:
-            pass
+        except: pass
         
     elif call.data.startswith("rejtg_"):
         parts = call.data.split("_")
         target_cid = parts[1]
         amt = int(parts[2])
-        
         bot.edit_message_text("❌ Request Rejected.", cid, call.message.message_id)
         try:
             bot.send_message(target_cid, f"❌ **Your payment of ₹{amt} was rejected by the admin.** Please contact support.", parse_mode="Markdown")
-        except:
-            pass
+        except: pass
             
     elif call.data == "has_acc_no":
-        bot.edit_message_text(
-            "🔗 **Please visit** https://glorybot.pro\n\n1. Create your account.\n2. Come back to this bot.\n3. Click 'Credit Guild Glory Bot' again and select **Yes**.",
-            cid, call.message.message_id, parse_mode="Markdown", disable_web_page_preview=True
-        )
+        bot.edit_message_text("🔗 **Please visit** https://glorybot.pro\n\n1. Create your account.\n2. Come back to this bot.\n3. Click 'Credit Guild Glory Bot' again and select **Yes**.", cid, call.message.message_id, parse_mode="Markdown", disable_web_page_preview=True)
         
     elif call.data == "has_acc_yes":
-        msg = bot.edit_message_text(
-            "Great! Send your **Website Username** and **Email** separated by a space.\n\n*Example:* `Keshv keshv@gmail.com`",
-            cid, call.message.message_id, parse_mode="Markdown"
-        )
+        msg = bot.edit_message_text("Great! Send your **Website Username** and **Email** separated by a space.\n\n*Example:* `Keshv keshv@gmail.com`", cid, call.message.message_id, parse_mode="Markdown")
         bot.register_next_step_handler(msg, process_glory_request)
         
     elif call.data == "admin_add_credit":
         msg = bot.send_message(cid, "👤 Enter the exact **Website Username** of the user:", parse_mode="Markdown")
         bot.register_next_step_handler(msg, admin_get_username)
-        
-    elif call.data == "admin_view_orders":
-        orders = STATE.get('orders', [])
-        pending = [o for o in orders if o['status'] == 'pending']
-        if not pending:
-            bot.send_message(cid, "📊 No pending orders.")
-        else:
-            text = f"📊 **Pending Orders ({len(pending)})**\n\n"
-            for o in pending[-5:]:
-                text += f"🆔 `{o['id'][:8]}...`\n👤 {o['username']}\n💰 ₹{o['price']} → {o['credits']} credits\n📅 {datetime.fromtimestamp(o['ts']/1000).strftime('%d/%m %H:%M')}\n\n"
-            bot.send_message(cid, text, parse_mode="Markdown")
         
     elif call.data.startswith("approve_"):
         parts = call.data.split("_")
@@ -798,14 +716,13 @@ def handle_query(call):
         target_user = parts[2]
         amt_paid = int(parts[3])
         
-        # ✅ FIXED: Proper persistence
         if target_user in STATE["users"]:
-            add_credits_safe(target_user, 1)  # Add 1 credit
+            STATE["users"][target_user]["credits"] += 1
+            save_state_to_file()
             bot.edit_message_text(f"✅ Approved. 1 Credit added to {target_user} on website.", cid, call.message.message_id)
             try:
                 bot.send_message(target_cid, "🎉 **Dear user, your approval has been confirmed!**\n\nPlease check https://glorybot.pro. Your credits have been added successfully.", parse_mode="Markdown", disable_web_page_preview=True)
-            except:
-                pass
+            except: pass
         else:
             bot.answer_callback_query(call.id, "User not found in website database! Cannot add credits.", show_alert=True)
             
@@ -813,21 +730,12 @@ def handle_query(call):
         parts = call.data.split("_")
         target_cid = parts[1]
         amt_paid = int(parts[3])
-        
-        # ✅ FIXED: Refund balance with persistence
-        if "tg_users" not in STATE:
-            STATE["tg_users"] = {}
-        if str(target_cid) not in STATE["tg_users"]:
-            STATE["tg_users"][str(target_cid)] = {"balance": 0}
-        
-        STATE["tg_users"][str(target_cid)]["balance"] += amt_paid
-        save_state(STATE)  # ✅ PERSIST
-        
         bot.edit_message_text("❌ Request Rejected. Balance refunded to user.", cid, call.message.message_id)
+        STATE["tg_users"][str(target_cid)]["balance"] += amt_paid
+        save_state_to_file()
         try:
             bot.send_message(target_cid, "❌ **Your credit request was rejected by the admin.**\nYour money has been refunded to your bot balance.", parse_mode="Markdown")
-        except:
-            pass
+        except: pass
 
 def process_glory_request(message):
     cid = message.chat.id
@@ -843,9 +751,9 @@ def process_glory_request(message):
         bot.send_message(cid, "❌ Insufficient balance.")
         return
         
-    # ✅ Deduct with persistence
+    # User ka paisa wallet se cut gaya
     STATE["tg_users"][str(cid)]["balance"] -= starter_price
-    save_state(STATE)  # ✅ PERSIST DEDUCTION
+    save_state_to_file()
     
     bot.send_message(cid, "✅ Your order has been submitted to admins for approval. Please wait for the confirmation message.")
     
@@ -857,8 +765,7 @@ def process_glory_request(message):
     for owner in OWNERS:
         try:
             bot.send_message(owner, f"🔔 **New Credit Request!**\n\n👤 TG ID: `{cid}`\n🌐 Web User: `{username}`\n📧 Email: `{email}`\n💰 Amount Deducted: ₹{starter_price}", parse_mode="Markdown", reply_markup=markup)
-        except:
-            pass
+        except: pass
 
 def admin_get_username(message):
     cid = message.chat.id
@@ -874,12 +781,13 @@ def admin_add_credits_final(message, username):
     cid = message.chat.id
     try:
         amt = int(message.text)
-        add_credits_safe(username, amt)  # ✅ PERSISTED
+        STATE["users"][username]["credits"] += amt
+        save_state_to_file()
         bot.send_message(cid, f"✅ Success! Added {amt} credits to {username}.\nNew balance: {STATE['users'][username]['credits']}")
     except:
         bot.send_message(cid, "❌ Invalid number. Operation cancelled.")
 
-# ─── BACKGROUND TASKS ─────────────────────────────────────────────────────
+# Background thread taaki Flask aur Bot ek saath chal saken
 def run_bot():
     while True:
         try:
@@ -888,37 +796,9 @@ def run_bot():
             print(f"Telegram Bot error: {e}")
             time.sleep(3)
 
-def periodic_cleanup():
-    """Clean expired codes every 5 minutes"""
-    while True:
-        time.sleep(300)
-        try:
-            clean_expired_codes()
-            print("🧹 Cleaned expired codes")
-        except Exception as e:
-            print(f"Cleanup error: {e}")
-
-# Start background threads
 bot_thread = threading.Thread(target=run_bot, daemon=True)
 bot_thread.start()
 
-cleanup_thread = threading.Thread(target=periodic_cleanup, daemon=True)
-cleanup_thread.start()
-
-# ─── ERROR HANDLERS ──────────────────────────────────────────────────────
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({"error": "Not found"}), 404
-
-@app.errorhandler(500)
-def server_error(e):
-    return jsonify({"error": "Internal server error"}), 500
-
-# ─── MAIN ─────────────────────────────────────────────────────────────────
 if __name__ == '__main__':
-    print("🚀 GLORY BOT PRO Server Starting...")
-    print(f"📁 Data directory: {os.path.abspath(DATA_DIR)}")
-    print(f"💾 State file: {os.path.abspath(STATE_FILE)}")
-    print(f"👥 Users loaded: {len(STATE.get('users', {}))}")
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=port, debug=False)
