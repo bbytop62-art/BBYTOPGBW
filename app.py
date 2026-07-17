@@ -93,6 +93,58 @@ def save_state_to_file():
 # Load state on startup
 load_state()
 
+def fetch_guild_info(clan_id, region):
+    if not region:
+        region = "IND"
+    region = str(region).strip().upper()
+    url = f"https://star-guild-info.lovable.app/api/public/info?clan_id={clan_id}&region={region}"
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            res = r.json()
+            if res.get("status") == "success":
+                return res
+    except Exception as e:
+        print(f"Error fetching guild info for clan_id={clan_id}, region={region}: {e}")
+    return None
+
+def auto_update_bots_loop():
+    # Wait for startup
+    time.sleep(10)
+    while True:
+        try:
+            bot_ids = list(STATE.get("bots", {}).keys())
+            for bid in bot_ids:
+                bot = STATE["bots"].get(bid)
+                if not bot:
+                    continue
+                if bot.get("approved") and not bot.get("rejected"):
+                    clan_id = bot.get("uid")
+                    region = bot.get("server", "IND")
+                    if clan_id:
+                        res = fetch_guild_info(clan_id, region)
+                        if res:
+                            bot['guildName'] = res.get('clan_name', bot.get('guildName', 'Guild'))
+                            bot['level'] = res.get('guild_level', res.get('level', bot.get('level', 1)))
+                            bot['members'] = res.get('current_members', res.get('current_members', bot.get('members', 5)))
+                            
+                            current_glory = res.get('glory_points', res.get('score', 0))
+                            if 'initialGlory' not in bot or bot['initialGlory'] is None:
+                                bot['initialGlory'] = current_glory
+                                
+                            gained = max(0, current_glory - bot['initialGlory'])
+                            bot['glory'] = gained
+                            bot['score'] = current_glory
+                            print(f"Auto-updated bot {bid} ({bot['guildName']}): current={current_glory}, initial={bot['initialGlory']}, gained={gained}")
+            save_state_to_file()
+        except Exception as e:
+            print(f"Error in auto_update_bots_loop: {e}")
+        time.sleep(30)
+
+auto_update_thread = threading.Thread(target=auto_update_bots_loop, daemon=True)
+auto_update_thread.start()
+
+
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
 CODE_FILE = 'code.json'
 
@@ -331,6 +383,26 @@ def save_state():
     current_username = session['username']
     
     if current['role'] in ('admin', 'staff'):
+        # Intercept bot approvals to fetch immediate data from external API
+        if 'bots' in data and isinstance(data['bots'], dict):
+            for bid, incoming_bot in data['bots'].items():
+                existing_bot = STATE.get('bots', {}).get(bid)
+                # If newly approved
+                if incoming_bot.get('approved') and (not existing_bot or not existing_bot.get('approved')):
+                    clan_id = incoming_bot.get('uid')
+                    region = incoming_bot.get('server', 'IND')
+                    if clan_id:
+                        res = fetch_guild_info(clan_id, region)
+                        if res:
+                            current_glory = res.get('glory_points', res.get('score', 0))
+                            incoming_bot['initialGlory'] = current_glory
+                            incoming_bot['score'] = current_glory
+                            incoming_bot['glory'] = 0
+                            incoming_bot['guildName'] = res.get('clan_name', incoming_bot.get('guildName', 'Guild'))
+                            incoming_bot['level'] = res.get('guild_level', res.get('level', incoming_bot.get('level', 1)))
+                            incoming_bot['members'] = res.get('total_members', res.get('current_members', incoming_bot.get('members', 5)))
+                            print(f"Newly approved bot {bid} immediately updated from API. initialGlory={current_glory}")
+
         # Admin or staff can modify all allowed keys, including 'users'
         allowed_keys = ['users', 'orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
         for key in allowed_keys:
@@ -468,7 +540,7 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8078228501, 8726156194]
+OWNERS = [8703570301, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
