@@ -127,19 +127,29 @@ def register():
         
     if username in STATE['users']:
         return jsonify({"error": "Username already exists"}), 400
-        
-        # Welcome Email
+
+    # Save user to state
+    STATE['users'][username] = {
+        "username": username,
+        "password": password,
+        "email": email,
+        "credits": 0,
+        "role": "user",
+        "banned": False
+    }
+
+    # Welcome Email (optional — won't block registration if it fails)
     try:
         resend.Emails.send({
-            "from": "info@glorybot.pro", 
+            "from": "info@glorybot.pro",
             "to": email,
             "subject": "Welcome to GLORY BOT PRO!",
-            "html": f"<strong>Hello {username},</strong><br><br>Your account has been verified and created successfully."
+            "html": f"<strong>Hello {username},</strong><br><br>Your account has been created successfully. Welcome to GLORY BOT PRO!"
         })
     except Exception as e:
         print(f"Email failed to send: {e}")
 
-    return jsonify({"success": True, "message": "User created successfully"})
+    return jsonify({"success": True, "message": "Account created successfully"})
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -330,7 +340,7 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8703570301, 8726156194, 8078228501]
+OWNERS = [8703570301, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
