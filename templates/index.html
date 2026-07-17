@@ -2812,8 +2812,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
   } catch(e) {}
   // periodic refresh for bot status (user)
-  setInterval(() => {
+  setInterval(async () => {
     if (currentUser) {
+      try {
+        await loadState();
+      } catch(e) {}
       const u = state.users[currentUser];
       if (u && u.role === 'user' && document.getElementById('userdash').classList.contains('active')) {
         if (currentUserTab === 'home') renderBotCard();
@@ -2823,7 +2826,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         renderAdminBots();
       }
     }
-  }, 15000);
+  }, 30000);
 });
 </script>
 </body>
