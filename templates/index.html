@@ -1653,8 +1653,7 @@ async function saveState() {
     pricePacks: state.pricePacks,
     announcement: state.announcement,
     maintenance: state.maintenance,
-    siteLogo: state.siteLogo,
-    users: state.users
+    siteLogo: state.siteLogo
   };
   try {
     await apiFetch('/api/save-state', {
@@ -2262,13 +2261,13 @@ function switchAdminTab(tab) {
   document.getElementById('atab-'+tab)?.classList.add('active');
 
   if (tab==='orders') renderAdminOrders();
-  if (tab==='users') renderAdminUsers();
+  if (tab==='users') { loadState().then(() => { renderAdminUsers(); refreshAdminStats(); }); }
   if (tab==='bots') renderAdminBots();
   if (tab==='coupons') renderAdminCoupons();
-  if (tab==='credits') renderCreditController();
+  if (tab==='credits') { loadState().then(() => renderCreditController()); }
   if (tab==='pricing') renderAdminPricing();
   if (tab==='branding') renderLogoPreview();
-  if (tab==='staff') renderStaffPanel();
+  if (tab==='staff') { loadState().then(() => renderStaffPanel()); }
   refreshAdminStats();
 }
 
@@ -2363,18 +2362,32 @@ function renderAdminUsers() {
 
 async function quickCredit(username, amount) {
   if (!state.users[username]) return;
-  state.users[username].credits = Math.max(0, state.users[username].credits + amount);
-  await saveState();
-  renderAdminUsers(); refreshAdminStats();
-  showToast(`Credits updated for @${username}`,'success');
+  const newCredits = Math.max(0, state.users[username].credits + amount);
+  try {
+    const res = await apiFetch('/api/admin/update-user', {
+      method: 'POST',
+      body: JSON.stringify({ username, credits: newCredits })
+    });
+    if (res.error) { showToast(res.error, 'error'); return; }
+    state.users[username].credits = res.credits;
+    renderAdminUsers(); refreshAdminStats();
+    showToast(`Credits updated for @${username}`, 'success');
+  } catch(e) { showToast('Network error', 'error'); }
 }
 
 async function toggleBan(username) {
   if (!state.users[username]) return;
-  state.users[username].banned = !state.users[username].banned;
-  await saveState();
-  renderAdminUsers();
-  showToast(state.users[username].banned ? `@${username} banned` : `@${username} unbanned`,'info');
+  const newBanned = !state.users[username].banned;
+  try {
+    const res = await apiFetch('/api/admin/update-user', {
+      method: 'POST',
+      body: JSON.stringify({ username, banned: newBanned })
+    });
+    if (res.error) { showToast(res.error, 'error'); return; }
+    state.users[username].banned = res.banned;
+    renderAdminUsers();
+    showToast(res.banned ? `@${username} banned` : `@${username} unbanned`, 'info');
+  } catch(e) { showToast('Network error', 'error'); }
 }
 
 
