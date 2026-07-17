@@ -290,25 +290,33 @@ def save_state():
     if not current or current['role'] not in ('admin', 'staff'):
         return jsonify({"error": "Forbidden"}), 403
     data = request.json
-    allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo', 'users']
+    allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
     for key in allowed_keys:
         if key in data:
-            if key == 'users':
-                incoming = data[key]
-                for uname, udata in incoming.items():
-                    existing = STATE['users'].get(uname, {})
-                    # Staff cannot modify admin accounts
-                    if existing.get('role') == 'admin' and current['role'] == 'staff':
-                        continue
-                    # Preserve password if not sent
-                    if 'password' not in udata:
-                        udata['password'] = existing.get('password', '')
-                    STATE['users'][uname] = udata
-            else:
-                STATE[key] = data[key]
+            STATE[key] = data[key]
     return jsonify({"success": True})
 
 
+
+@app.route('/api/admin/update-user', methods=['POST'])
+@login_required
+def admin_update_user():
+    current = STATE['users'].get(session['username'])
+    if not current or current['role'] not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
+    data = request.json
+    target_username = data.get('username')
+    target = STATE['users'].get(target_username)
+    if not target:
+        return jsonify({"error": "User not found"}), 404
+    # Staff cannot modify admin accounts
+    if current['role'] == 'staff' and target['role'] == 'admin':
+        return jsonify({"error": "Staff cannot modify admin accounts"}), 403
+    if 'credits' in data:
+        target['credits'] = max(0, int(data['credits']))
+    if 'banned' in data:
+        target['banned'] = bool(data['banned'])
+    return jsonify({"success": True, "credits": target['credits'], "banned": target['banned']})
 
 @app.route('/api/admin/set-role', methods=['POST'])
 @login_required
