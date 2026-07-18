@@ -145,6 +145,10 @@ def save_state_to_file():
 
 # Startup code: load from Supabase -> if fail, use default and save to Supabase
 loaded_ok = load_state()
+if os.path.exists("logo.jpg"):
+    STATE["siteLogo"] = "/logo.jpg"
+    print("Detected logo.jpg, overriding siteLogo path to /logo.jpg in memory.")
+    
 if not loaded_ok:
     print("Initial state not found or failed to load. Initializing Supabase with default state...")
     if "tg_users" not in STATE:
@@ -170,6 +174,74 @@ if not loaded_ok:
             print(f"Failed to initialize default state in Supabase. Status: {r.status_code}, response: {r.text}")
     except Exception as e:
         print(f"Exception initializing default state in Supabase: {e}")
+
+# Save state if we overrode the logo on startup
+if os.path.exists("logo.jpg"):
+    try:
+        # Save locally and asynchronously to Supabase
+        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(STATE, f, indent=4)
+        threading.Thread(target=save_state_to_supabase, daemon=True).start()
+    except Exception as e:
+        pass
+
+# Helper to generate QR with Logo overlay
+def generate_qr_with_logo(data_str, logo_path="logo.jpg"):
+    import qrcode
+    from PIL import Image
+    
+    # Generate QR Code with High Error Correction
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(data_str)
+    qr.make(fit=True)
+    
+    qr_img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+    
+    if os.path.exists(logo_path) and os.path.getsize(logo_path) > 0:
+        try:
+            logo = Image.open(logo_path)
+            qr_width, qr_height = qr_img.size
+            logo_size = int(qr_width * 0.22) # 22% size
+            
+            logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
+            
+            border_size = int(logo_size * 0.12)
+            if border_size < 2:
+                border_size = 2
+                
+            logo_with_border_size = logo_size + 2 * border_size
+            logo_border = Image.new("RGB", (logo_with_border_size, logo_with_border_size), "white")
+            logo_border.paste(logo, (border_size, border_size))
+            
+            pos = ((qr_width - logo_with_border_size) // 2, (qr_height - logo_with_border_size) // 2)
+            qr_img.paste(logo_border, pos)
+        except Exception as e:
+            print(f"Error overlaying logo onto QR: {e}")
+            
+    return qr_img
+
+@app.route('/logo.jpg')
+def serve_logo():
+    return send_from_directory('.', 'logo.jpg')
+
+@app.route('/api/qr')
+def serve_qr_code():
+    import io
+    from flask import send_file
+    data_str = request.args.get('data', '')
+    if not data_str:
+        return "No data provided", 400
+    
+    img = generate_qr_with_logo(data_str)
+    bio = io.BytesIO()
+    img.save(bio, 'PNG')
+    bio.seek(0)
+    return send_file(bio, mimetype='image/png')
 
 def fetch_guild_info(clan_id, region):
     if not region:
@@ -347,7 +419,7 @@ def create_fampay_payment():
         order_id = f"GB-{uuid.uuid4().hex[:8].upper()}"
         upi_link = f"upi://pay?pa={UPI_ID}&pn={urllib.parse.quote(PAYEE_NAME)}&am={amount}&cu=INR&tn={order_id}"
         encoded_upi = urllib.parse.quote_plus(upi_link)
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_upi}"
+        qr_url = f"/api/qr?data={encoded_upi}"
 
         return jsonify({
             "success": True,
@@ -579,12 +651,12 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8078228501, 8726156194]
+OWNERS = [8703570301, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
     # Added @glorybothelp to the list
-    channels = ["@bbytopapis", "@glorybotpro", "@glorybothelp"]
+    channels = ["@keshvexffmethod", "@glorybotpro", "@glorybothelp"]
     for ch in channels:
         try:
             status = bot.get_chat_member(ch, user_id).status
@@ -596,7 +668,7 @@ def check_sub(user_id):
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/bbytopapis"))
+    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/keshvexffmethod"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
     # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
@@ -680,10 +752,15 @@ def process_add_balance(message):
         
     try:
         import urllib.parse
+        import io
         order_id = f"GB-{uuid.uuid4().hex[:8].upper()}"
         upi_link = f"upi://pay?pa={UPI_ID}&pn={urllib.parse.quote(PAYEE_NAME)}&am={amt}&cu=INR&tn={order_id}"
-        encoded_upi = urllib.parse.quote_plus(upi_link)
-        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_upi}"
+        
+        qr_img = generate_qr_with_logo(upi_link)
+        bio = io.BytesIO()
+        bio.name = 'qr.png'
+        qr_img.save(bio, 'PNG')
+        bio.seek(0)
     except Exception as e:
         bot.send_message(cid, f"❌ Error generating QR code: {e}")
         return
@@ -693,7 +770,7 @@ def process_add_balance(message):
                 f"⚠️ Please scan the QR code above or pay directly to the UPI ID.\n"
                 f"Once paid, send your **12-digit UPI UTR / Transaction Reference Number**:")
     
-    bot.send_photo(cid, qr_url, caption=msg_text, parse_mode="Markdown")
+    bot.send_photo(cid, bio, caption=msg_text, parse_mode="Markdown")
     bot.register_next_step_handler(message, lambda m: get_utr_for_balance(m, order_id, amt))
 
 def get_utr_for_balance(message, order_id, amt):
