@@ -126,7 +126,8 @@ def auto_update_bots_loop():
                         if res:
                             bot['guildName'] = res.get('clan_name', bot.get('guildName', 'Guild'))
                             bot['level'] = res.get('guild_level', res.get('level', bot.get('level', 1)))
-                            bot['members'] = res.get('current_members', res.get('current_members', bot.get('members', 5)))
+                            bot['members'] = res.get('current_members', bot.get('members', 5))
+                            bot['maxMembers'] = res.get('total_members', bot.get('maxMembers', 25))
                             
                             current_glory = res.get('glory_points', res.get('score', 0))
                             if 'initialGlory' not in bot or bot['initialGlory'] is None:
@@ -400,7 +401,8 @@ def save_state():
                             incoming_bot['glory'] = 0
                             incoming_bot['guildName'] = res.get('clan_name', incoming_bot.get('guildName', 'Guild'))
                             incoming_bot['level'] = res.get('guild_level', res.get('level', incoming_bot.get('level', 1)))
-                            incoming_bot['members'] = res.get('total_members', res.get('current_members', incoming_bot.get('members', 5)))
+                            incoming_bot['members'] = res.get('current_members', incoming_bot.get('members', 5))
+                            incoming_bot['maxMembers'] = res.get('total_members', incoming_bot.get('maxMembers', 25))
                             print(f"Newly approved bot {bid} immediately updated from API. initialGlory={current_glory}")
 
         # Admin or staff can modify all allowed keys, including 'users'
