@@ -1500,7 +1500,7 @@
     <div id="screenshot-section" style="display:none;">
       <div class="field-group">
         <div class="field-label">🔖 UTR Transaction Number</div>
-        <input type="text" id="utr-input" placeholder="Auto-filled UTR after verification" readonly style="background:var(--bg3);opacity:0.8;color:var(--green)">
+        <input type="text" id="utr-input" placeholder="Enter 12-digit UPI UTR / Ref No." style="background:var(--bg3);color:var(--text1)">
       </div>
       <div class="field-group">
         <div class="field-label">📷 Upload Payment Screenshot</div>
@@ -1874,7 +1874,7 @@ function renderBotCard() {
         <div style="font-size:12px;color:var(--text2);margin-top:2px">ID: ${bot.uid} · 🇮🇳 ${bot.server||'IND'} · <span style="color:var(--blue2);font-weight:700">${bot.botCount||4} BOTS</span></div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic">"SAFE GLORY — GLORY BOT PRO"</div>
       </div>
-      <div class="status-badge ${cls}" style="flex-shrink:0">${status==='ACTIVE LIVE'?'● ':''}${status}</div>
+      <div class="status-badge ${cls}" style="flex-shrink:0">${(status==='ACTIVE LIVE' || status==='RUNNING')?'● ':''}${status}</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid var(--border)">
       <div style="text-align:center">
@@ -1942,7 +1942,7 @@ function renderBotLaunches() {
   }
   list.innerHTML = myBots.map(b => {
     const { status, pct } = getBotStatus(b);
-    const cls = status==='ACTIVE LIVE'?'success':(status==='PENDING APPROVAL'||status==='STARTING SOON')?'pending':status==='REJECTED'?'failed':'pending';
+    const cls = (status==='ACTIVE LIVE' || status==='RUNNING')?'success':(status==='PENDING APPROVAL'||status==='STARTING SOON')?'pending':status==='REJECTED'?'failed':'pending';
     return `
       <div class="history-card">
         <div class="hist-icon" style="overflow:hidden;border-radius:8px">${state.siteLogo ? `<img src="${state.siteLogo}" style="width:100%;height:100%;object-fit:cover">` : '⚡'}</div>
@@ -2003,7 +2003,7 @@ function getBotStatus(b) {
   if (b.rejected) return { status:'REJECTED', pct:0, cls:'expired' };
   if (!b.approved) return { status:'PENDING APPROVAL', pct:0, cls:'pending' };
   if (b.overrideStatus) {
-    const cls = b.overrideStatus==='ACTIVE LIVE'?'live':b.overrideStatus==='OFFLINE'?'offline':'expired';
+    const cls = (b.overrideStatus==='ACTIVE LIVE' || b.overrideStatus==='RUNNING') ? 'live' : (b.overrideStatus==='OFFLINE' || b.overrideStatus==='STOPPED') ? 'offline' : 'expired';
     return { status:b.overrideStatus, pct:(b.overridePct!==null?b.overridePct:0), cls };
   }
   const now = Date.now();
@@ -2088,7 +2088,7 @@ async function openBuyModal(credits, price, packId) {
   document.getElementById('utr-input').value = '';
   document.getElementById('screenshot-input').value = '';
   document.getElementById('buy-status').style.display = 'none';
-  document.getElementById('screenshot-section').style.display = 'none';
+  document.getElementById('screenshot-section').style.display = 'block';
   
   const vStatus = document.getElementById('payment-verify-status');
   vStatus.style.display = 'block';
@@ -2115,9 +2115,7 @@ async function openBuyModal(credits, price, packId) {
        document.getElementById('buy-qr').src = res.qr;
        document.getElementById('buy-qr').style.opacity = '1';
        currentOrderId = res.order_id;
-       vStatus.textContent = '⏳ Waiting for payment auto-verification...';
-       
-       verifyTimer = setInterval(pollVerification, 5000);
+       vStatus.textContent = '⚡ QR Generated! Please pay, then enter your 12-digit UPI UTR/Ref number and upload the screenshot below.';
     } else {
        vStatus.textContent = '❌ Failed to generate QR. ' + (res.message || '');
        vStatus.style.color = 'var(--red)';
@@ -2130,25 +2128,8 @@ async function openBuyModal(credits, price, packId) {
 }
 
 async function pollVerification() {
-  if (!currentOrderId) return;
-  try {
-    const res = await fetch(`/api/fampay/verify/${currentOrderId}`);
-    const data = await res.json();
-    
-    if (data.verified) {
-       clearInterval(verifyTimer);
-       const vStatus = document.getElementById('payment-verify-status');
-       vStatus.textContent = '✅ Payment Verified Successfully!';
-       vStatus.style.color = 'var(--green)';
-       vStatus.style.borderColor = 'rgba(34,197,94,.4)';
-       vStatus.style.background = 'rgba(34,197,94,.1)';
-       
-       document.getElementById('utr-input').value = data.utr || 'N/A';
-       document.getElementById('screenshot-section').style.display = 'block';
-    }
-  } catch(e) {
-    console.log('Polling error:', e);
-  }
+  // Disabled as FamPay external auto-verification API is suspended.
+  // Using direct manual verification for 100% reliability.
 }
 
 function closeBuyModal() { 
@@ -2160,6 +2141,8 @@ async function submitOrder() {
   const utr = document.getElementById('utr-input').value.trim();
   const fileInput = document.getElementById('screenshot-input');
   
+  if (!utr) { showToast('Please enter your 12-digit UPI UTR/Ref number!', 'error'); return; }
+  if (utr.length < 6) { showToast('Please enter a valid UPI UTR/Ref number!', 'error'); return; }
   if (!fileInput.files.length) { showToast('Please select a payment screenshot!','error'); return; }
   
   const formData = new FormData();
@@ -2586,7 +2569,7 @@ function renderUserPacks() {
       <div class="be-header">
         <div class="be-logo">${b.emoji||'⚔️'}</div>
         <div>
-          <div class="be-name">${b.guildName} <span class="status-badge ${status==='ACTIVE LIVE'?'live':status==='OFFLINE'?'offline':status==='STARTING SOON'?'pending':'expired'}" style="font-size:10px;padding:2px 8px">${status}${status==='STARTING SOON'?' ('+fmtCountdown(msLeft)+')':''}</span></div>
+          <div class="be-name">${b.guildName} <span class="status-badge ${(status==='ACTIVE LIVE' || status==='RUNNING')?'live':(status==='OFFLINE' || status==='STOPPED')?'offline':status==='STARTING SOON'?'pending':'expired'}" style="font-size:10px;padding:2px 8px">${status}${status==='STARTING SOON'?' ('+fmtCountdown(msLeft)+')':''}</span></div>
           <div class="be-owner">Owner: @${b.owner} · UID: ${b.uid} · Server: ${b.server}</div>
           <div class="be-owner">Requested: ${new Date(b.requestTime).toLocaleString()}${b.approvedTime?' · Approved: '+new Date(b.approvedTime).toLocaleString():''}</div>
         </div>
@@ -2604,6 +2587,8 @@ function renderUserPacks() {
         <div class="be-field span2"><label>BOT STATUS</label>
           <select onchange="updateBot('${b.id}','overrideStatus',this.value)">
             <option ${statusSelect==='ACTIVE LIVE'?'selected':''}>ACTIVE LIVE</option>
+            <option ${statusSelect==='RUNNING'?'selected':''}>RUNNING</option>
+            <option ${statusSelect==='STOPPED'?'selected':''}>STOPPED</option>
             <option ${statusSelect==='OFFLINE'?'selected':''}>OFFLINE</option>
             <option ${statusSelect==='EXPIRED'?'selected':''}>EXPIRED</option>
           </select>
