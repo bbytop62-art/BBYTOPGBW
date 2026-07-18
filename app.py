@@ -59,34 +59,81 @@ STATE = {
 }
 
 STATE_FILE = "state_db.json"
+REMOTE_STATE_URL = "https://kvdb.io/ydv_glory_bot_pro_state_8cb59a2f/state"
 
 def load_state():
     global STATE
-    if os.path.exists(STATE_FILE):
-        try:
-            with open(STATE_FILE, 'r', encoding='utf-8') as f:
-                loaded = json.load(f)
-                # Update current state keys
+    loaded_any = False
+    
+    # Try fetching from remote backup first (Render persistence)
+    try:
+        print(f"Fetching state from remote backup: {REMOTE_STATE_URL}")
+        r = requests.get(REMOTE_STATE_URL, timeout=10)
+        if r.status_code == 200:
+            loaded = r.json()
+            if loaded and isinstance(loaded, dict) and "users" in loaded:
                 for k, v in loaded.items():
                     STATE[k] = v
-            print("Successfully loaded state from file.")
-        except Exception as e:
-            print(f"Error loading state from file: {e}")
-    else:
-        # Save initial state
+                loaded_any = True
+                print("Successfully loaded state from remote backup.")
+                # Save locally as cache
+                try:
+                    with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                        json.dump(STATE, f, indent=4)
+                except Exception as cache_err:
+                    print(f"Error caching remote state locally: {cache_err}")
+            else:
+                print("Remote state fetched, but structure was invalid.")
+        else:
+            print(f"Remote backup not found or returned status: {r.status_code}")
+    except Exception as e:
+        print(f"Error loading state from remote backup: {e}")
+
+    # Fallback to local file if remote was not successfully loaded
+    if not loaded_any:
+        if os.path.exists(STATE_FILE):
+            try:
+                with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                    loaded = json.load(f)
+                    if loaded and isinstance(loaded, dict) and "users" in loaded:
+                        for k, v in loaded.items():
+                            STATE[k] = v
+                        loaded_any = True
+                        print("Successfully loaded state from local file fallback.")
+            except Exception as e:
+                print(f"Error loading state from local file: {e}")
+
+    if not loaded_any:
+        # Create initial state file locally and save to remote
         try:
             with open(STATE_FILE, 'w', encoding='utf-8') as f:
                 json.dump(STATE, f, indent=4)
-            print("Created initial state file.")
+            print("Created initial local state file.")
+            # Save remotely too
+            threading.Thread(target=save_state_remotely, daemon=True).start()
         except Exception as e:
             print(f"Error creating initial state file: {e}")
 
+def save_state_remotely():
+    try:
+        data_str = json.dumps(STATE)
+        r = requests.put(REMOTE_STATE_URL, data=data_str, timeout=10)
+        if r.status_code in (200, 201):
+            print("Successfully saved state to remote backup.")
+        else:
+            print(f"Failed to save state to remote backup. Status: {r.status_code}")
+    except Exception as e:
+        print(f"Error saving state to remote backup: {e}")
+
 def save_state_to_file():
     try:
+        # Save locally
         tmp_file = STATE_FILE + '.tmp'
         with open(tmp_file, 'w', encoding='utf-8') as f:
             json.dump(STATE, f, indent=4)
         os.replace(tmp_file, STATE_FILE)
+        # Save to remote backup asynchronously
+        threading.Thread(target=save_state_remotely, daemon=True).start()
     except Exception as e:
         print(f"Error saving state to file: {e}")
 
@@ -542,12 +589,12 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8703570301, 8726156194]
+OWNERS = [8078228501, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
     # Added @glorybothelp to the list
-    channels = ["@keshvexffmethod", "@glorybotpro", "@glorybothelp"]
+    channels = ["@bbytopapis", "@glorybotpro", "@glorybothelp"]
     for ch in channels:
         try:
             status = bot.get_chat_member(ch, user_id).status
