@@ -55,90 +55,121 @@ STATE = {
     ],
     "announcement": "⚡ Welcome to GLORY BOT PRO — 24/7 bots running NON-STOP!",
     "maintenance": False,
-    "siteLogo": "⚡"   # Simple emoji, no base64
+    "siteLogo": "⚡",   # Simple emoji, no base64
+    "tg_users": {}
+}
+
+# ─── SUPABASE CONFIG ─────────────────────────────────────
+SUPABASE_URL = "https://uamtokyocsatauzdiihp.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbXRva3lvY3NhdGF1emRpaWhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQzNjQzNDYsImV4cCI6MjA5OTk0MDM0Nn0.wovPIdIdUQvWVQf8yfzRCBe-dIMeQ1_YiK6qSBde-rw"
+
+SUPABASE_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json"
 }
 
 STATE_FILE = "state_db.json"
-REMOTE_STATE_URL = "https://kvdb.io/ydv_glory_bot_pro_state_8cb59a2f/state"
 
 def load_state():
     global STATE
-    loaded_any = False
-    
-    # Try fetching from remote backup first (Render persistence)
+    url = f"{SUPABASE_URL}/rest/v1/app_state?id=eq.1"
     try:
-        print(f"Fetching state from remote backup: {REMOTE_STATE_URL}")
-        r = requests.get(REMOTE_STATE_URL, timeout=10)
+        print(f"Loading state from Supabase: {url}")
+        r = requests.get(url, headers=SUPABASE_HEADERS, timeout=10)
         if r.status_code == 200:
-            loaded = r.json()
-            if loaded and isinstance(loaded, dict) and "users" in loaded:
-                for k, v in loaded.items():
-                    STATE[k] = v
-                loaded_any = True
-                print("Successfully loaded state from remote backup.")
-                # Save locally as cache
-                try:
-                    with open(STATE_FILE, 'w', encoding='utf-8') as f:
-                        json.dump(STATE, f, indent=4)
-                except Exception as cache_err:
-                    print(f"Error caching remote state locally: {cache_err}")
-            else:
-                print("Remote state fetched, but structure was invalid.")
+            data = r.json()
+            if data and isinstance(data, list) and len(data) > 0:
+                loaded = data[0].get("data")
+                if loaded and isinstance(loaded, dict) and "users" in loaded:
+                    for k, v in loaded.items():
+                        STATE[k] = v
+                    if "tg_users" not in STATE:
+                        STATE["tg_users"] = {}
+                    print("Successfully loaded state from Supabase.")
+                    
+                    # Cache locally as fallback
+                    try:
+                        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+                            json.dump(STATE, f, indent=4)
+                    except Exception as cache_err:
+                        print(f"Error caching Supabase state locally: {cache_err}")
+                    return True
+            print("No state row with id=1 found in Supabase.")
         else:
-            print(f"Remote backup not found or returned status: {r.status_code}")
+            print(f"Error loading state from Supabase. Status: {r.status_code}, response: {r.text}")
     except Exception as e:
-        print(f"Error loading state from remote backup: {e}")
-
-    # Fallback to local file if remote was not successfully loaded
-    if not loaded_any:
-        if os.path.exists(STATE_FILE):
-            try:
-                with open(STATE_FILE, 'r', encoding='utf-8') as f:
-                    loaded = json.load(f)
-                    if loaded and isinstance(loaded, dict) and "users" in loaded:
-                        for k, v in loaded.items():
-                            STATE[k] = v
-                        loaded_any = True
-                        print("Successfully loaded state from local file fallback.")
-            except Exception as e:
-                print(f"Error loading state from local file: {e}")
-
-    if not loaded_any:
-        # Create initial state file locally and save to remote
+        print(f"Exception loading state from Supabase: {e}")
+    
+    # Local fallback
+    if os.path.exists(STATE_FILE):
         try:
-            with open(STATE_FILE, 'w', encoding='utf-8') as f:
-                json.dump(STATE, f, indent=4)
-            print("Created initial local state file.")
-            # Save remotely too
-            threading.Thread(target=save_state_remotely, daemon=True).start()
+            with open(STATE_FILE, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                if loaded and isinstance(loaded, dict) and "users" in loaded:
+                    for k, v in loaded.items():
+                        STATE[k] = v
+                    if "tg_users" not in STATE:
+                        STATE["tg_users"] = {}
+                    print("Successfully loaded state from local file fallback.")
+                    return True
         except Exception as e:
-            print(f"Error creating initial state file: {e}")
+            print(f"Error loading state from local file fallback: {e}")
+            
+    return False
 
-def save_state_remotely():
+def save_state_to_supabase():
+    url = f"{SUPABASE_URL}/rest/v1/app_state?id=eq.1"
     try:
-        data_str = json.dumps(STATE)
-        r = requests.put(REMOTE_STATE_URL, data=data_str, timeout=10)
-        if r.status_code in (200, 201):
-            print("Successfully saved state to remote backup.")
+        payload = {"data": STATE}
+        r = requests.patch(url, headers=SUPABASE_HEADERS, json=payload, timeout=10)
+        if r.status_code in (200, 201, 204):
+            print("Successfully saved state to Supabase.")
         else:
-            print(f"Failed to save state to remote backup. Status: {r.status_code}")
+            print(f"Failed to save state to Supabase. Status: {r.status_code}, response: {r.text}")
     except Exception as e:
-        print(f"Error saving state to remote backup: {e}")
+        print(f"Error saving state to Supabase: {e}")
 
 def save_state_to_file():
+    # Save locally as cache fallback
     try:
-        # Save locally
         tmp_file = STATE_FILE + '.tmp'
         with open(tmp_file, 'w', encoding='utf-8') as f:
             json.dump(STATE, f, indent=4)
         os.replace(tmp_file, STATE_FILE)
-        # Save to remote backup asynchronously
-        threading.Thread(target=save_state_remotely, daemon=True).start()
     except Exception as e:
-        print(f"Error saving state to file: {e}")
+        print(f"Error saving local state cache: {e}")
 
-# Load state on startup
-load_state()
+    # Save to Supabase asynchronously using PATCH
+    threading.Thread(target=save_state_to_supabase, daemon=True).start()
+
+# Startup code: load from Supabase -> if fail, use default and save to Supabase
+loaded_ok = load_state()
+if not loaded_ok:
+    print("Initial state not found or failed to load. Initializing Supabase with default state...")
+    if "tg_users" not in STATE:
+        STATE["tg_users"] = {}
+    
+    # Save default state to local file
+    try:
+        with open(STATE_FILE, 'w', encoding='utf-8') as f:
+            json.dump(STATE, f, indent=4)
+        print("Created initial local fallback state file.")
+    except Exception as e:
+        print(f"Error creating local state file: {e}")
+        
+    # Insert default state row to Supabase via POST (with upsert handling just in case)
+    try:
+        url = f"{SUPABASE_URL}/rest/v1/app_state"
+        headers = {**SUPABASE_HEADERS, "Prefer": "resolution=merge-duplicates"}
+        payload = {"id": 1, "data": STATE}
+        r = requests.post(url, headers=headers, json=payload, timeout=10)
+        if r.status_code in (200, 201, 204):
+            print("Successfully initialized default state in Supabase.")
+        else:
+            print(f"Failed to initialize default state in Supabase. Status: {r.status_code}, response: {r.text}")
+    except Exception as e:
+        print(f"Exception initializing default state in Supabase: {e}")
 
 def fetch_guild_info(clan_id, region):
     if not region:
