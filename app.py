@@ -651,12 +651,12 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8703570301, 8726156194]
+OWNERS = [8078228501, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
     # Added @glorybothelp to the list
-    channels = ["@keshvexffmethod", "@glorybotpro", "@glorybothelp"]
+    channels = ["@bbytopapis", "@glorybotpro", "@glorybothelp"]
     for ch in channels:
         try:
             status = bot.get_chat_member(ch, user_id).status
@@ -668,7 +668,7 @@ def check_sub(user_id):
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/keshvexffmethod"))
+    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/bbytopapis"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
     # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
