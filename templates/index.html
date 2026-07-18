@@ -1879,15 +1879,15 @@ function renderBotCard() {
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;background:rgba(255,255,255,.04);border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid var(--border)">
       <div style="text-align:center">
         <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👥 Members</div>
-        <div style="font-size:18px;font-weight:900">${bot.members||7}<span style="font-size:12px;color:var(--text3)">/${bot.maxMembers||55}</span></div>
+        <div style="font-size:18px;font-weight:900">${bot.members||0}<span style="font-size:12px;color:var(--text3)">/${bot.maxMembers||25}</span></div>
       </div>
       <div style="text-align:center;border-left:1px solid var(--border);border-right:1px solid var(--border)">
-        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">👑 Leader</div>
-        <div style="font-size:14px;font-weight:700;color:var(--text2)">—</div>
+        <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">🔥 Earned Glory</div>
+        <div style="font-size:18px;font-weight:900;color:var(--green)">${(bot.glory||0).toLocaleString()}</div>
       </div>
       <div style="text-align:center">
         <div style="font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">⭐ Total Glory</div>
-        <div style="font-size:18px;font-weight:900;color:var(--orange)">${(bot.glory||0).toLocaleString()}</div>
+        <div style="font-size:18px;font-weight:900;color:var(--orange)">${(bot.score||0).toLocaleString()}</div>
       </div>
     </div>
     <div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px">
@@ -1900,7 +1900,7 @@ function renderBotCard() {
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <div style="font-size:13px;color:var(--text2)">⏱ Uptime <strong style="color:var(--blue2)">${uptimeStr}</strong></div>
-        <div style="font-size:13px;color:var(--text2)">⭐ Glory <strong style="color:var(--orange)">${(bot.glory||0).toLocaleString()}</strong></div>
+        <div style="font-size:13px;color:var(--text2)">🔥 Earned <strong style="color:var(--green)">${(bot.glory||0).toLocaleString()}</strong></div>
       </div>
       <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text3);text-transform:uppercase;margin-bottom:6px">8H GOAL <span style="float:right;color:var(--orange)">${Math.round(pct)}%</span></div>
       <div class="goal-bar"><div class="goal-fill" style="width:${pct}%"></div></div>
@@ -2596,9 +2596,10 @@ function renderUserPacks() {
         <div class="be-field span2"><label>GUILD NAME</label><input type="text" value="${b.guildName}" onchange="updateBot('${b.id}','guildName',this.value)"></div>
         <div class="be-field"><label>EMOJI / LOGO</label><input type="text" value="${b.emoji}" onchange="updateBot('${b.id}','emoji',this.value)" style="font-size:20px;text-align:center"></div>
         <div class="be-field"><label>LEVEL</label><input type="number" value="${b.level}" onchange="updateBot('${b.id}','level',parseInt(this.value))"></div>
-        <div class="be-field"><label>GLORY GAINED</label><input type="number" value="${b.glory}" onchange="updateBot('${b.id}','glory',parseInt(this.value))"></div>
-        <div class="be-field"><label>TOTAL SCORE</label><input type="number" value="${b.score}" onchange="updateBot('${b.id}','score',parseInt(this.value))"></div>
-        <div class="be-field"><label>MEMBERS</label><input type="number" value="${b.members}" onchange="updateBot('${b.id}','members',parseInt(this.value))"></div>
+        <div class="be-field"><label>GLORY GAINED (EARNED)</label><input type="number" value="${b.glory}" onchange="updateBot('${b.id}','glory',parseInt(this.value))"></div>
+        <div class="be-field"><label>TOTAL SCORE (GLORY)</label><input type="number" value="${b.score}" onchange="updateBot('${b.id}','score',parseInt(this.value))"></div>
+        <div class="be-field"><label>CURRENT MEMBERS</label><input type="number" value="${b.members||0}" onchange="updateBot('${b.id}','members',parseInt(this.value))"></div>
+        <div class="be-field"><label>MAX MEMBERS</label><input type="number" value="${b.maxMembers||25}" onchange="updateBot('${b.id}','maxMembers',parseInt(this.value))"></div>
         <div class="be-field"><label>PROGRESS %</label><input type="number" min="0" max="100" value="${Math.round(pct)}" onchange="updateBot('${b.id}','overridePct',parseInt(this.value))"></div>
         <div class="be-field span2"><label>BOT STATUS</label>
           <select onchange="updateBot('${b.id}','overrideStatus',this.value)">
