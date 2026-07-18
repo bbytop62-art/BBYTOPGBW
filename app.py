@@ -339,33 +339,22 @@ def logout():
 @app.route("/api/fampay/create", methods=["POST"])
 @login_required
 def create_fampay_payment():
+    import urllib.parse
     data = request.json
     amount = int(data.get("amount", 0))
 
     try:
-        r = requests.get(
-            FAMPAY_QR_API,
-            params={
-                "upi": UPI_ID,
-                "amount": amount
-            },
-            timeout=20
-        )
-
-        res = r.json()
-
-        if res.get("status") != "success":
-            return jsonify({
-                "success": False,
-                "message": "Unable to generate QR"
-            }), 400
+        order_id = f"GB-{uuid.uuid4().hex[:8].upper()}"
+        upi_link = f"upi://pay?pa={UPI_ID}&pn={urllib.parse.quote(PAYEE_NAME)}&am={amount}&cu=INR&tn={order_id}"
+        encoded_upi = urllib.parse.quote_plus(upi_link)
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_upi}"
 
         return jsonify({
             "success": True,
-            "order_id": res["data"]["order_id"],
-            "qr": res["data"]["qr_url"],
-            "amount": res["data"]["amount"],
-            "expires": res["data"]["expires_at_ist"]
+            "order_id": order_id,
+            "qr": qr_url,
+            "amount": amount,
+            "expires": "15 Minutes"
         })
 
     except Exception as e:
@@ -390,40 +379,10 @@ def current_user():
 @app.route("/api/fampay/verify/<order_id>", methods=["GET"])
 @login_required
 def verify_fampay_payment(order_id):
-    try:
-        r = requests.get(
-            FAMPAY_VERIFY_API,
-            params={
-                "order_id": order_id,
-                "api_key": FAMPAY_API_KEY
-            },
-            timeout=20
-        )
-
-        res = r.json()
-
-        if res.get("status") == "success":
-            data = res["data"]
-
-            return jsonify({
-                "verified": True,
-                "transaction_id": data["transaction_id"],
-                "utr": data["utr"],
-                "sender": data["sender_name"],
-                "amount": data["amount"],
-                "payment_time": data["payment_time_ist"]
-            })
-
-        return jsonify({
-            "verified": False,
-            "message": res.get("message", "Payment Pending")
-        })
-
-    except Exception as e:
-        return jsonify({
-            "verified": False,
-            "message": str(e)
-        }), 500
+    return jsonify({
+        "verified": False,
+        "message": "Manual verification required. Please enter UTR and upload screenshot."
+    })
 @app.route("/api/fampay/upload", methods=["POST"])
 @login_required
 def upload_payment_proof():
@@ -637,7 +596,7 @@ def check_sub(user_id):
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/keshvexffmethod"))
+    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/bbytopapis"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
     # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
@@ -720,80 +679,32 @@ def process_add_balance(message):
         return
         
     try:
-        r = requests.get(
-            FAMPAY_QR_API,
-            params={
-                "upi": UPI_ID,
-                "amount": amt
-            },
-            timeout=20
-        )
-
-        data = r.json()
-
-        if data.get("status") != "success":
-            bot.send_message(cid, "❌ QR generation failed.")
-            return
-
-        order_id = data["data"]["order_id"]
-        qr_url = data["data"]["qr_url"]
-
+        import urllib.parse
+        order_id = f"GB-{uuid.uuid4().hex[:8].upper()}"
+        upi_link = f"upi://pay?pa={UPI_ID}&pn={urllib.parse.quote(PAYEE_NAME)}&am={amt}&cu=INR&tn={order_id}"
+        encoded_upi = urllib.parse.quote_plus(upi_link)
+        qr_url = f"https://api.qrserver.com/v1/create-qr-code/?size=300x300&data={encoded_upi}"
     except Exception as e:
-        bot.send_message(cid, f"❌ API Error:\n{e}")
+        bot.send_message(cid, f"❌ Error generating QR code: {e}")
         return
         
     msg_text = (f"🔰 **Pay Exact:** ₹{amt}\n"
                 f"🔖 **UPI ID:** `{UPI_ID}`\n\n"
                 f"⚠️ Please scan the QR code above or pay directly to the UPI ID.\n"
-                f"After completing the payment, wait for auto-verification.")
+                f"Once paid, send your **12-digit UPI UTR / Transaction Reference Number**:")
     
     bot.send_photo(cid, qr_url, caption=msg_text, parse_mode="Markdown")
-    bot.send_message(
-        cid,
-        "⏳ Waiting for auto verification...\nPlease don't close the bot."
-    )
+    bot.register_next_step_handler(message, lambda m: get_utr_for_balance(m, order_id, amt))
 
-    threading.Thread(
-        target=wait_for_payment_verification,
-        args=(cid, order_id, amt),
-        daemon=True
-    ).start()
-
-def wait_for_payment_verification(cid, order_id, amt):
-    attempts = 0
-    while attempts < 60: # Poll for 5 mins
-        try:
-            verify = requests.get(
-                FAMPAY_VERIFY_API,
-                params={
-                    "order_id": order_id,
-                    "api_key": FAMPAY_API_KEY
-                },
-                timeout=15
-            ).json()
-
-            if verify.get("status") == "success":
-                data = verify["data"]
-
-                bot.send_message(
-                    cid,
-                    f"✅ Payment Verified Successfully!\n💰 Amount: ₹{data['amount']}\n🔖 UTR: `{data['utr']}`\n\n📷 **Please send your payment screenshot** for admin approval."
-                )
-
-                msg = bot.send_message(cid, "Upload screenshot now.")
-                bot.register_next_step_handler(
-                    msg,
-                    lambda m: process_payment_screenshot(m, order_id, data["amount"], data["utr"])
-                )
-                return
-
-        except Exception as e:
-            print("Verify Error:", e)
-
-        time.sleep(5)
-        attempts += 1
+def get_utr_for_balance(message, order_id, amt):
+    cid = message.chat.id
+    utr = message.text.strip() if message.text else ""
+    if not utr or len(utr) < 6:
+        bot.send_message(cid, "❌ Invalid UTR. Payment request cancelled. Please click 'Add Balance' and try again.")
+        return
         
-    bot.send_message(cid, "❌ Verification timeout. If you already paid, please contact admin manually.")
+    msg = bot.send_message(cid, "📷 Now, please upload the **payment screenshot** for verification:")
+    bot.register_next_step_handler(msg, lambda m: process_payment_screenshot(m, order_id, amt, utr))
 
 def process_payment_screenshot(message, order_id, amt, utr):
     cid = message.chat.id
