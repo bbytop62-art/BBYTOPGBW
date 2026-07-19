@@ -764,6 +764,7 @@
   .qr-box {
     background: #fff; border-radius: 14px; padding: 12px;
     display: inline-block; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+    position: relative;
   }
   .qr-img { width: 160px; height: 160px; display: block; }
   .upi-info { text-align: center; margin-bottom: 16px; }
@@ -1486,6 +1487,7 @@
     <div style="display:flex;justify-content:center;margin-bottom:12px">
       <div class="qr-box">
         <img class="qr-img" id="buy-qr" src="" alt="QR">
+        <img src="/logo.jpg" alt="Logo" onerror="this.style.display='none'" style="position:absolute;width:34px;height:34px;border-radius:50%;border:3px solid #fff;background:#fff;object-fit:cover;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 2px 8px rgba(0,0,0,.15)">
       </div>
     </div>
     <div class="upi-info">
@@ -2746,7 +2748,7 @@ function renderLogoPreview() {
 
 function applyLogoEverywhere() {
   const logo = state.siteLogo || '⚡';
-  const isImage = logo.startsWith('data:image');
+  const isImage = logo.startsWith('data:image') || logo.includes('.jpg') || logo.includes('.png') || logo.startsWith('/');
   const inner = isImage ? `<img src="${logo}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">` : logo;
   document.querySelectorAll('.land-logo-icon').forEach(el => el.innerHTML = inner);
   document.querySelectorAll('.auth-logo-box').forEach(el => {
