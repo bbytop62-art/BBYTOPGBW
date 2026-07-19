@@ -188,7 +188,7 @@ if os.path.exists("logo.jpg"):
 # Helper to generate QR with Logo overlay
 def generate_qr_with_logo(data_str, logo_path="logo.jpg"):
     import qrcode
-    from PIL import Image
+    from PIL import Image, ImageDraw
     
     # Generate QR Code with High Error Correction
     qr = qrcode.QRCode(
@@ -204,22 +204,37 @@ def generate_qr_with_logo(data_str, logo_path="logo.jpg"):
     
     if os.path.exists(logo_path) and os.path.getsize(logo_path) > 0:
         try:
-            logo = Image.open(logo_path)
+            logo = Image.open(logo_path).convert("RGBA")
             qr_width, qr_height = qr_img.size
-            logo_size = int(qr_width * 0.22) # 22% size
+            logo_size = int(qr_width * 0.20) # 20% size
             
             logo = logo.resize((logo_size, logo_size), Image.Resampling.LANCZOS)
             
-            border_size = int(logo_size * 0.12)
-            if border_size < 2:
-                border_size = 2
-                
-            logo_with_border_size = logo_size + 2 * border_size
-            logo_border = Image.new("RGB", (logo_with_border_size, logo_with_border_size), "white")
-            logo_border.paste(logo, (border_size, border_size))
+            # Create a circular mask for the logo
+            mask = Image.new("L", (logo_size, logo_size), 0)
+            draw = ImageDraw.Draw(mask)
+            draw.ellipse((0, 0, logo_size, logo_size), fill=255)
             
-            pos = ((qr_width - logo_with_border_size) // 2, (qr_height - logo_with_border_size) // 2)
-            qr_img.paste(logo_border, pos)
+            # Create circular logo with transparency
+            circular_logo = Image.new("RGBA", (logo_size, logo_size), (0, 0, 0, 0))
+            circular_logo.paste(logo, (0, 0), mask)
+            
+            # Create a larger white circle as background/border
+            border_padding = int(logo_size * 0.12)
+            if border_padding < 3:
+                border_padding = 3
+            border_size = logo_size + 2 * border_padding
+            
+            circular_border = Image.new("RGBA", (border_size, border_size), (0, 0, 0, 0))
+            draw_border = ImageDraw.Draw(circular_border)
+            draw_border.ellipse((0, 0, border_size, border_size), fill="white")
+            
+            # Paste circular logo onto circular white border
+            circular_border.paste(circular_logo, (border_padding, border_padding), circular_logo)
+            
+            # Paste circular_border onto QR image using its transparency as a mask
+            pos = ((qr_width - border_size) // 2, (qr_height - border_size) // 2)
+            qr_img.paste(circular_border, pos, circular_border)
         except Exception as e:
             print(f"Error overlaying logo onto QR: {e}")
             
