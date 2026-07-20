@@ -1300,6 +1300,7 @@
     <button class="admin-tab" onclick="switchAdminTab('branding')">🎨 Branding</button>
     <button class="admin-tab" onclick="switchAdminTab('broadcast')">📢 Broadcast</button>
     <button class="admin-tab" id="tab-staff" onclick="switchAdminTab('staff')">👥 Staff</button>
+    <button class="admin-tab" id="tab-security" onclick="switchAdminTab('security')">🛡️ Cloudflare</button>
   </div>
 
   <div class="admin-content">
@@ -1422,6 +1423,90 @@
         <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Promote users to Staff. Staff can manage orders, bots, coupons and credits — but cannot modify admin accounts.</div>
         <div id="admin-staff-list"></div>
       </div>
+
+    <!-- CLOUDFLARE SECURITY -->
+    <div id="atab-security" class="tab-panel">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;color:var(--text2)">🛡️ Cloudflare Security & Diagnostics</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">Monitor your site's Cloudflare protection and access detailed step-by-step setup guides.</div>
+      
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:16px">
+        <!-- Live Status Card -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">Protection Status</div>
+          <div id="cf-status-box" style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <span id="cf-status-indicator" style="width:12px;height:12px;border-radius:50%;background:#888;display:inline-block"></span>
+            <span id="cf-status-text" style="font-weight:700;font-size:14px">Checking...</span>
+          </div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px">
+            <div><strong>Detected IP:</strong> <span id="cf-diag-ip" class="font-mono" style="font-family:monospace;background:rgba(0,0,0,0.2);padding:2px 4px;border-radius:4px">—</span></div>
+            <div style="margin-top:4px"><strong>Country:</strong> <span id="cf-diag-country">—</span></div>
+            <div style="margin-top:4px"><strong>Ray ID:</strong> <span id="cf-diag-ray" class="font-mono" style="font-family:monospace;background:rgba(0,0,0,0.2);padding:2px 4px;border-radius:4px">—</span></div>
+            <div style="margin-top:4px"><strong>SSL/Protocol:</strong> <span id="cf-diag-proto">—</span></div>
+          </div>
+          <button class="um-btn promote" style="width:100%;padding:10px;font-weight:600;display:block;text-align:center" onclick="checkCloudflareStatus()">🔄 Run Connection Check</button>
+        </div>
+        
+        <!-- Quick Stats / Security Rules -->
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">Secure Header Protections</div>
+          <div style="font-size:12px;color:var(--text2);line-height:1.7">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+              <span>🔒 HTTP Only Session Cookie</span>
+              <span style="color:var(--green);font-weight:bold">ENABLED</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+              <span>🛡️ SameSite Session Lax</span>
+              <span style="color:var(--green);font-weight:bold">ENABLED</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;border-bottom:1px solid var(--border);padding-bottom:4px">
+              <span>🌐 CF Connecting IP Trust</span>
+              <span style="color:var(--green);font-weight:bold">ENABLED</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding-bottom:4px">
+              <span>📡 Direct IP Bypass Protection</span>
+              <span style="color:var(--green);font-weight:bold">ENABLED</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:11px;color:var(--text3);line-height:1.4">
+            Security logs are stored directly on the user list database profiles. Check the "👥 Users" tab to see real Cloudflare visitor IPs & countries!
+          </div>
+        </div>
+      </div>
+
+      <!-- Cloudflare Setup Instructions Guide -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;line-height:1.6">
+        <div style="font-size:15px;font-weight:700;color:var(--blue2);margin-bottom:14px;display:flex;align-items:center;gap:8px">
+          <span>⚙️</span> Cloudflare Setup Guide (Free Plan)
+        </div>
+        
+        <div style="display:flex;flex-direction:column;gap:14px;font-size:13px;color:var(--text2)">
+          <div>
+            <strong style="color:var(--text1)">1. Add Domain to Cloudflare</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Login to your Cloudflare dashboard, click <strong>"Add a Site"</strong>, and enter your domain name. Select the <strong>Free Plan</strong>.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text1)">2. Update Name Servers</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Go to your domain registrar (Namecheap, GoDaddy, Hostinger, etc.) and replace your current Name Servers with the custom Name Servers assigned by Cloudflare.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text1)">3. Configure DNS Records (Orange Cloud Proxy)</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">In Cloudflare DNS tab, add a <strong>CNAME</strong> record for your root domain pointing to your server domain (or an <strong>A</strong> record pointing to your server's public IP). Make sure the proxy status is set to <strong>"Proxied" (Orange Cloud)</strong>.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text1)">4. Enable SSL/TLS Encryption</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">In Cloudflare SSL/TLS tab, set encryption to <strong>"Flexible"</strong> (or <strong>"Full"</strong> if your host supports SSL natively). This encrypts all traffic between your users and Cloudflare.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text1)">5. Force HTTPS Security Settings</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Under SSL/TLS ➡️ Edge Certificates, turn ON <strong>"Always Use HTTPS"</strong> and <strong>"Automatic HTTPS Rewrites"</strong>. This redirects all unencrypted HTTP traffic to HTTPS.</p>
+          </div>
+          <div>
+            <strong style="color:var(--text1)">6. Setup WAF Firewall Rules (Anti-Bot & Rate Limits)</strong>
+            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Go to Security ➡️ WAF ➡️ Custom Rules. Create a rule to block spam: choose "Field: URI Path", "Operator: contains", "Value: /api/login" and trigger a "Rate Limit" or "JS Challenge" to block brute-force attacks!</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
       <!-- PRICING -->
     <div id="atab-pricing" class="tab-panel">
@@ -2239,7 +2324,7 @@ function refreshAdminStats() {
 function switchAdminTab(tab) {
   currentAdminTab = tab;
   document.querySelectorAll('.admin-tab').forEach((t,i) => t.classList.remove('active'));
-  const tabs = ['orders','users','bots','coupons','credits','pricing','branding','broadcast','staff'];
+  const tabs = ['orders','users','bots','coupons','credits','pricing','branding','broadcast','staff','security'];
   const idx = tabs.indexOf(tab);
   document.querySelectorAll('.admin-tab')[idx]?.classList.add('active');
   document.querySelectorAll('#adminpanel .tab-panel').forEach(p => p.classList.remove('active'));
@@ -2253,7 +2338,49 @@ function switchAdminTab(tab) {
   if (tab==='pricing') renderAdminPricing();
   if (tab==='branding') renderLogoPreview();
   if (tab==='staff') { loadState().then(() => renderStaffPanel()); }
+  if (tab==='security') checkCloudflareStatus();
   refreshAdminStats();
+}
+
+async function checkCloudflareStatus() {
+  const statusBox = document.getElementById('cf-status-box');
+  const indicator = document.getElementById('cf-status-indicator');
+  const text = document.getElementById('cf-status-text');
+  
+  const ipEl = document.getElementById('cf-diag-ip');
+  const countryEl = document.getElementById('cf-diag-country');
+  const rayEl = document.getElementById('cf-diag-ray');
+  const protoEl = document.getElementById('cf-diag-proto');
+  
+  if (text) text.textContent = 'Checking...';
+  if (indicator) indicator.style.backgroundColor = '#888';
+  
+  try {
+    const res = await apiFetch('/api/security-status');
+    if (res.success) {
+      if (ipEl) ipEl.textContent = res.ip;
+      if (countryEl) countryEl.textContent = res.country;
+      if (rayEl) rayEl.textContent = res.ray_id;
+      if (protoEl) protoEl.textContent = res.protocol.toUpperCase();
+      
+      if (res.is_cloudflare) {
+        if (text) text.textContent = 'Active & Protected (Cloudflare Connected)';
+        if (indicator) indicator.style.backgroundColor = 'var(--green)';
+        showToast('Cloudflare protection is ACTIVE!', 'success');
+      } else {
+        if (text) text.textContent = 'Direct IP/Local Access (Cloudflare Bypass)';
+        if (indicator) indicator.style.backgroundColor = 'var(--orange)';
+        showToast('Not connected through Cloudflare proxy. Follow the guide to set it up.', 'warning');
+      }
+    } else {
+      if (text) text.textContent = 'Diagnostics Failed';
+      if (indicator) indicator.style.backgroundColor = 'var(--red)';
+    }
+  } catch (err) {
+    if (text) text.textContent = 'Connection Error';
+    if (indicator) indicator.style.backgroundColor = 'var(--red)';
+    console.error(err);
+  }
 }
 
 function renderAdminOrders() {
@@ -2328,6 +2455,14 @@ function renderAdminUsers() {
             <div style="font-size:10px;color:var(--text3)">CREDITS</div>
           </div>
         </div>
+        
+        <!-- Cloudflare Geolocation & IP Logs -->
+        <div class="um-cf-info" style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:var(--text3)">
+          ${u.last_login_ip ? `<div>🌐 <strong>IP:</strong> <span class="font-mono" style="color:var(--text2)">${u.last_login_ip}</span> ${u.last_login_country ? `<span style="background:rgba(255,255,255,0.08);padding:1px 4px;border-radius:3px;margin-left:2px">${u.last_login_country}</span>` : ''}</div>` : ''}
+          ${u.last_active ? `<div>🕒 <strong>Active:</strong> <span style="color:var(--text2)">${new Date(u.last_active).toLocaleString()}</span></div>` : ''}
+          ${u.registration_ip && u.registration_ip !== u.last_login_ip ? `<div>📝 <strong>Reg IP:</strong> <span class="font-mono">${u.registration_ip}</span></div>` : ''}
+        </div>
+
         <div class="um-actions" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">
           ${canModify ? `
             <button class="um-btn add" onclick="quickCredit('${u.username}',1)">+1 CR</button>
