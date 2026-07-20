@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>GLORY BOT PRO</title>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@700;900&display=swap');
 
@@ -941,17 +942,17 @@
       left: 0;
       width: 100vw;
       height: 100vh;
-      background-color: #111;
-      background: radial-gradient(circle at top left, #151922 0%, #0d0f14 100%);
+      background-color: #ffffff;
       z-index: 999999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
-      color: #e2e8f0;
+      padding: 30px 24px;
+      color: #1d1d1f;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       transition: opacity 0.5s ease, visibility 0.5s ease;
+      overflow-y: auto;
     }
     #cf-challenge-overlay.verified {
       opacity: 0;
@@ -959,178 +960,85 @@
       pointer-events: none;
     }
     .cf-wrapper {
-      max-width: 480px;
+      max-width: 600px;
       width: 100%;
-      background: rgba(26, 32, 44, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 16px;
-      padding: 32px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(12px);
       text-align: left;
+      display: flex;
+      flex-direction: column;
     }
-    .cf-logo-section {
+    .cf-site-header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 24px;
     }
-    .cf-logo-icon {
-      color: #f38020;
-      font-size: 32px;
+    .cf-site-logo {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid #e2e8f0;
+    }
+    .cf-site-domain {
+      font-size: 34px;
+      font-weight: 700;
+      color: #000000;
+      letter-spacing: -0.5px;
+      line-height: 1.1;
     }
     .cf-title {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      color: #fff;
-      margin-bottom: 8px;
+      color: #000000;
+      margin-bottom: 12px;
+      line-height: 1.2;
     }
     .cf-subtitle {
-      font-size: 14px;
-      color: #94a3b8;
-      line-height: 1.5;
-      margin-bottom: 24px;
+      font-size: 15px;
+      color: #313131;
+      line-height: 1.6;
+      margin-bottom: 28px;
     }
-    .cf-host {
-      font-family: monospace;
+    
+    #cf-turnstile-container {
+      display: flex;
+      justify-content: flex-start;
+      margin-bottom: 16px;
+      min-height: 85px;
+    }
+    #cf-status-label {
       font-size: 13px;
-      background: rgba(255, 255, 255, 0.06);
-      padding: 4px 8px;
-      border-radius: 6px;
-      color: #38bdf8;
-    }
-    
-    /* Turnstile Widget */
-    .turnstile-widget {
-      background: #fafafa;
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: #333;
-      font-family: sans-serif;
-      min-height: 65px;
-      box-sizing: border-box;
+      color: #555555;
       margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      transition: background-color 0.2s, border-color 0.2s;
-      cursor: pointer;
-    }
-    
-    .turnstile-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    
-    /* Checkbox & Ring */
-    .turnstile-checkbox-wrap {
-      width: 28px;
-      height: 28px;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .turnstile-checkbox {
-      width: 24px;
-      height: 24px;
-      border: 2px solid #ccc;
-      border-radius: 4px;
-      background: #fff;
-      transition: all 0.2s;
-    }
-    .turnstile-checkbox-wrap:hover .turnstile-checkbox {
-      border-color: #999;
-    }
-    
-    /* Loader Ring */
-    .turnstile-ring {
-      position: absolute;
-      width: 28px;
-      height: 28px;
-      border: 2px solid transparent;
-      border-top-color: #3b82f6;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .turnstile-label {
-      font-size: 14px;
       font-weight: 500;
-      color: #333;
-      user-select: none;
+      text-align: left;
     }
-    
-    .turnstile-right {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: center;
-      font-size: 9px;
-      color: #666;
-      line-height: 1.3;
+    .cf-separator {
+      border: 0;
+      border-top: 1px solid #e0e0e0;
+      margin-top: 24px;
+      margin-bottom: 16px;
+      width: 100%;
     }
-    .turnstile-logo {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-      font-weight: bold;
-      color: #f38020;
-      font-size: 11px;
-    }
-    
-    /* Verified State */
-    .turnstile-widget.verified {
-      background: #f4fbf7;
-      border-color: #a7f3d0;
-    }
-    .turnstile-widget.verified .turnstile-checkbox {
-      border-color: #10b981;
-      background: #10b981;
-      position: relative;
-    }
-    .turnstile-widget.verified .turnstile-checkbox::after {
-      content: '';
-      position: absolute;
-      left: 7px;
-      top: 3px;
-      width: 5px;
-      height: 11px;
-      border: solid #fff;
-      border-width: 0 2.5px 2.5px 0;
-      transform: rotate(45deg);
-    }
-    
-    /* Footer Diagnostics */
     .cf-footer {
-      margin-top: 16px;
       font-size: 12px;
-      color: #64748b;
+      color: #555555;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      border-top: 1px solid rgba(255, 255, 255, 0.06);
-      padding-top: 16px;
+      gap: 8px;
+      line-height: 1.4;
     }
     .cf-footer-row {
       display: flex;
       justify-content: space-between;
+      font-weight: 500;
+      color: #333333;
     }
-    .cf-brand {
+    .cf-footer-desc {
       font-size: 11px;
-      color: #475569;
-      margin-top: 16px;
-      text-align: center;
+      color: #666666;
+      line-height: 1.5;
     }
     
   </style>
@@ -1140,44 +1048,32 @@
 <!-- 🛡️ CLOUDFLARE CHALLENGE OVERLAY (STRICT SECURITY INTERSTITIAL) -->
 <div id="cf-challenge-overlay">
   <div class="cf-wrapper">
-    <div class="cf-logo-section">
-      <div class="cf-logo-icon">☁️</div>
-      <div style="font-weight: 800; font-size: 18px; color: #fff; font-family: system-ui, sans-serif;">Cloudflare</div>
+    <div class="cf-site-header">
+      <img src="/logo.jpg" alt="Logo" class="cf-site-logo" onerror="this.style.display='none'">
+      <div id="cf-host-name" class="cf-site-domain">loading...</div>
     </div>
     
-    <div class="cf-title">Checking if the site connection is secure</div>
-    <div class="cf-subtitle" style="margin-bottom: 20px;">
-      <span id="cf-host-name" class="cf-host">loading...</span> needs to review the security of your connection before proceeding.
+    <div class="cf-title">Performing security verification</div>
+    <div class="cf-subtitle">
+      This website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.
     </div>
     
-    <!-- Turnstile Widget -->
-    <div class="turnstile-widget" id="cf-widget" onclick="triggerCFVerify()">
-      <div class="turnstile-left">
-        <div class="turnstile-checkbox-wrap">
-          <div class="turnstile-checkbox" id="cf-checkbox"></div>
-          <div class="turnstile-ring" id="cf-ring"></div>
-        </div>
-        <div class="turnstile-label" id="cf-label">Verify you are human</div>
-      </div>
-      <div class="turnstile-right">
-        <div class="turnstile-logo">
-          <span style="font-size:12px; margin-right: 2px;">☁️</span> cloudflare
-        </div>
-        <div style="font-size: 8px; color: #999; margin-top: 2px;">Turnstile Privacy · Terms</div>
-      </div>
-    </div>
+    <!-- Real Cloudflare Turnstile Widget (Light Theme) -->
+    <div id="cf-turnstile-container"></div>
+    <div id="cf-status-label">Verifying...</div>
+    
+    <hr class="cf-separator">
     
     <div class="cf-footer">
       <div class="cf-footer-row">
         <span>Why am I seeing this page?</span>
-        <span style="color: #94a3b8;">DDOS Protection</span>
       </div>
-      <div style="font-size: 11px; color: #64748b; line-height: 1.4; margin-top: 4px;">
+      <div class="cf-footer-desc">
         Requests from your network are checked to filter malicious bot attacks. Once verified, you will be redirected to the application immediately.
       </div>
-      <div class="cf-footer-row" style="margin-top: 8px; border-top: 1px dashed rgba(255,255,255,0.04); padding-top: 8px;">
-        <span>Ray ID: <strong id="cf-ray-id" style="font-family: monospace; color: #e2e8f0;">—</strong></span>
-        <span>Performance & Security by Cloudflare</span>
+      <div class="cf-footer-row" style="margin-top: 4px;">
+        <span style="font-size: 11px; color: #888;">Ray ID: <strong id="cf-ray-id" style="font-family: monospace; font-weight: 600; color: #333;">—</strong></span>
+        <span style="font-size: 11px; color: #888;">Performance & Security by Cloudflare</span>
       </div>
     </div>
   </div>
@@ -1718,39 +1614,6 @@
         </div>
       </div>
 
-      <!-- Cloudflare Setup Instructions Guide -->
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;line-height:1.6">
-        <div style="font-size:15px;font-weight:700;color:var(--blue2);margin-bottom:14px;display:flex;align-items:center;gap:8px">
-          <span>⚙️</span> Cloudflare Setup Guide (Free Plan)
-        </div>
-        
-        <div style="display:flex;flex-direction:column;gap:14px;font-size:13px;color:var(--text2)">
-          <div>
-            <strong style="color:var(--text1)">1. Add Domain to Cloudflare</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Login to your Cloudflare dashboard, click <strong>"Add a Site"</strong>, and enter your domain name. Select the <strong>Free Plan</strong>.</p>
-          </div>
-          <div>
-            <strong style="color:var(--text1)">2. Update Name Servers</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Go to your domain registrar (Namecheap, GoDaddy, Hostinger, etc.) and replace your current Name Servers with the custom Name Servers assigned by Cloudflare.</p>
-          </div>
-          <div>
-            <strong style="color:var(--text1)">3. Configure DNS Records (Orange Cloud Proxy)</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">In Cloudflare DNS tab, add a <strong>CNAME</strong> record for your root domain pointing to your server domain (or an <strong>A</strong> record pointing to your server's public IP). Make sure the proxy status is set to <strong>"Proxied" (Orange Cloud)</strong>.</p>
-          </div>
-          <div>
-            <strong style="color:var(--text1)">4. Enable SSL/TLS Encryption</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">In Cloudflare SSL/TLS tab, set encryption to <strong>"Flexible"</strong> (or <strong>"Full"</strong> if your host supports SSL natively). This encrypts all traffic between your users and Cloudflare.</p>
-          </div>
-          <div>
-            <strong style="color:var(--text1)">5. Force HTTPS Security Settings</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Under SSL/TLS ➡️ Edge Certificates, turn ON <strong>"Always Use HTTPS"</strong> and <strong>"Automatic HTTPS Rewrites"</strong>. This redirects all unencrypted HTTP traffic to HTTPS.</p>
-          </div>
-          <div>
-            <strong style="color:var(--text1)">6. Setup WAF Firewall Rules (Anti-Bot & Rate Limits)</strong>
-            <p style="margin:4px 0 0 0;color:var(--text3);font-size:12px">Go to Security ➡️ WAF ➡️ Custom Rules. Create a rule to block spam: choose "Field: URI Path", "Operator: contains", "Value: /api/login" and trigger a "Rate Limit" or "JS Challenge" to block brute-force attacks!</p>
-          </div>
-        </div>
-      </div>
     </div>
 
       <!-- PRICING -->
@@ -1918,46 +1781,104 @@
 
 <script>
 // Cloudflare Challenge Interaction Setup
-document.addEventListener("DOMContentLoaded", () => {
-  // Generate authentic-looking random Ray ID
+let turnstileWidgetId = null;
+
+function initTurnstile() {
   const chars = '0123456789abcdef';
   const rayId = Array.from({length: 16}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
   const rayEl = document.getElementById('cf-ray-id');
   if (rayEl) rayEl.textContent = rayId.toUpperCase();
   
-  // Set current hostname dynamically
+  let hostname = window.location.hostname || "ffglory.pro";
+  if (hostname !== "localhost" && hostname !== "127.0.0.1" && !hostname.startsWith("www.") && !hostname.endsWith(".run.app")) {
+    hostname = "www." + hostname;
+  }
   const hostEl = document.getElementById('cf-host-name');
-  if (hostEl) hostEl.textContent = window.location.hostname || "glorybotpro.com";
-});
+  if (hostEl) hostEl.textContent = hostname;
 
-let isCFVerifying = false;
-function triggerCFVerify() {
-  if (isCFVerifying) return;
-  isCFVerifying = true;
-  
-  const widget = document.getElementById('cf-widget');
-  const checkbox = document.getElementById('cf-checkbox');
-  const ring = document.getElementById('cf-ring');
-  const label = document.getElementById('cf-label');
-  const overlay = document.getElementById('cf-challenge-overlay');
-  
-  // Start spin animation inside the Turnstile widget
-  if (checkbox) checkbox.style.borderColor = 'transparent';
-  if (ring) ring.style.display = 'block';
-  if (label) label.textContent = 'Verifying your browser...';
-  
-  setTimeout(() => {
-    // Show green tick mark / success state
-    if (ring) ring.style.display = 'none';
-    if (widget) widget.classList.add('verified');
-    if (label) label.textContent = 'Connection secure! Redirecting...';
-    
-    setTimeout(() => {
-      // Fade out overlay smoothly to reveal page content
-      if (overlay) overlay.classList.add('verified');
-    }, 650);
-  }, 1400);
+  try {
+    if (typeof turnstile !== 'undefined') {
+      turnstileWidgetId = turnstile.render('#cf-turnstile-container', {
+        sitekey: '0x4AAAAAAD5yemwIhnmsOti6',
+        callback: onCaptchaSuccess,
+        'error-callback': onCaptchaError,
+        'expired-callback': onCaptchaExpired,
+        theme: 'light'
+      });
+    } else {
+      setTimeout(initTurnstile, 500);
+    }
+  } catch (e) {
+    console.error("Turnstile load error: ", e);
+    const label = document.getElementById('cf-status-label');
+    if (label) label.textContent = "Security verification loading...";
+  }
 }
+
+async function onCaptchaSuccess(token) {
+  const label = document.getElementById('cf-status-label');
+  if (label) {
+    label.textContent = "Verifying secure token with server...";
+    label.style.color = "#2563eb";
+  }
+  
+  try {
+    const res = await fetch('/api/verify-captcha', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: token })
+    });
+    const data = await res.json();
+    if (data.success) {
+      if (label) {
+        label.textContent = "Connection secure! Redirecting...";
+        label.style.color = "#16a34a";
+      }
+      setTimeout(() => {
+        const overlay = document.getElementById('cf-challenge-overlay');
+        if (overlay) overlay.classList.add('verified');
+      }, 600);
+    } else {
+      if (label) {
+        label.textContent = "Verification failed: " + (data.error || "Please try again.");
+        label.style.color = "#dc2626";
+      }
+      if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+        turnstile.reset(turnstileWidgetId);
+      }
+    }
+  } catch (err) {
+    console.error("Network error: ", err);
+    if (label) {
+      label.textContent = "Connection error. Retrying...";
+      label.style.color = "#ea580c";
+    }
+    if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+      setTimeout(() => turnstile.reset(turnstileWidgetId), 2000);
+    }
+  }
+}
+
+function onCaptchaError(code) {
+  const label = document.getElementById('cf-status-label');
+  if (label) {
+    label.textContent = "Security check encountered an error. Code: " + code;
+    label.style.color = "#dc2626";
+  }
+}
+
+function onCaptchaExpired() {
+  const label = document.getElementById('cf-status-label');
+  if (label) {
+    label.textContent = "Security token expired. Resetting...";
+    label.style.color = "#ea580c";
+  }
+  if (typeof turnstile !== 'undefined' && turnstileWidgetId !== null) {
+    turnstile.reset(turnstileWidgetId);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", initTurnstile);
 // ─────────────────────────────────────────────────────────────────────────────
 //  GLOBAL STATE (loaded from backend)
 // ─────────────────────────────────────────────────────────────────────────────
