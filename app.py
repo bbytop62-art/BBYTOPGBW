@@ -18,6 +18,10 @@ resend.api_key = "re_Use1fV2g_7uP3F5e7EMjXGyBZ6nFf19wV"
 app = Flask(__name__)
 app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
 
+# Security settings for session cookie to prevent client-side/custom inspect theft
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+
 # ─── UPI CONFIG ───────────────────────────────────────────
 # ─── FAMPAY CONFIG ───────────────────────────────────────────
 FAMPAY_API_KEY = "FAM_abcf6524d550262d3905933b996806dcc952cfa5ec131d82"
@@ -69,7 +73,7 @@ SUPABASE_HEADERS = {
     "Content-Type": "application/json"
 }
 
-STATE_FILE = "state_db.json"
+STATE_FILE = os.path.join(app.root_path, "state_db.json")
 
 def load_state():
     global STATE
@@ -145,9 +149,12 @@ def save_state_to_file():
 
 # Startup code: load from Supabase -> if fail, use default and save to Supabase
 loaded_ok = load_state()
-if os.path.exists("logo.jpg"):
-    STATE["siteLogo"] = "/logo.jpg"
-    print("Detected logo.jpg, overriding siteLogo path to /logo.jpg in memory.")
+local_logo_path = os.path.join(app.root_path, "logo.jpg")
+if os.path.exists(local_logo_path):
+    current_logo = STATE.get("siteLogo")
+    if current_logo == "⚡" or not current_logo or current_logo == "/logo.jpg":
+        STATE["siteLogo"] = "/logo.jpg"
+        print("Detected logo.jpg, setting siteLogo path to /logo.jpg in memory.")
     
 if not loaded_ok:
     print("Initial state not found or failed to load. Initializing Supabase with default state...")
@@ -176,7 +183,7 @@ if not loaded_ok:
         print(f"Exception initializing default state in Supabase: {e}")
 
 # Save state if we overrode the logo on startup
-if os.path.exists("logo.jpg"):
+if os.path.exists(local_logo_path) and STATE.get("siteLogo") == "/logo.jpg":
     try:
         # Save locally and asynchronously to Supabase
         with open(STATE_FILE, 'w', encoding='utf-8') as f:
@@ -186,9 +193,12 @@ if os.path.exists("logo.jpg"):
         pass
 
 # Helper to generate QR with Logo overlay
-def generate_qr_with_logo(data_str, logo_path="logo.jpg"):
+def generate_qr_with_logo(data_str, logo_path=None):
     import qrcode
     from PIL import Image, ImageDraw
+    
+    if logo_path is None:
+        logo_path = os.path.join(app.root_path, "logo.jpg")
     
     # Generate QR Code with High Error Correction
     qr = qrcode.QRCode(
@@ -239,10 +249,10 @@ def generate_qr_with_logo(data_str, logo_path="logo.jpg"):
             print(f"Error overlaying logo onto QR: {e}")
             
     return qr_img
-
+    
 @app.route('/logo.jpg')
 def serve_logo():
-    return send_from_directory('.', 'logo.jpg')
+    return send_from_directory(app.root_path, 'logo.jpg')
 
 @app.route('/api/qr')
 def serve_qr_code():
@@ -353,19 +363,79 @@ def home():
 @app.route('/video.mp4')
 def serve_video():
     # यह app.py वाले फोल्डर से सीधा video.mp4 को फ्रंटएंड में भेज देगा
-    return send_from_directory('.', 'video.mp4')
+    return send_from_directory(app.root_path, 'video.mp4')
 
 @app.route('/uploads/<filename>')
 def serve_uploads(filename):
-    return send_from_directory('uploads', filename)
+    return send_from_directory(os.path.join(app.root_path, 'uploads'), filename)
 
 # ─── PUBLIC API ─────────────────────────────────────────────────────────────
 
 
 @app.route('/api/get-private-data', methods=['GET'])
 def get_private_data():
-    # Return full state (frontend will use it)
-    return jsonify(STATE)
+    username = session.get('username')
+    user = STATE.get('users', {}).get(username) if username else None
+    
+    # Base public state fields
+    public_state = {
+        "pricePacks": STATE.get("pricePacks", []),
+        "announcement": STATE.get("announcement", ""),
+        "maintenance": STATE.get("maintenance", False),
+        "siteLogo": STATE.get("siteLogo", "⚡"),
+        "users": {},
+        "orders": [],
+        "bots": {},
+        "coupons": {},
+        "redeemedBy": {}
+    }
+    
+    if not user:
+        # Unauthenticated guest: return public fields only
+        return jsonify(public_state)
+        
+    user_role = user.get('role', 'user')
+    
+    if user_role in ('admin', 'staff'):
+        # Admin or Staff: return full state with all passwords completely stripped
+        sanitized_users = {}
+        for un, u_data in STATE.get("users", {}).items():
+            u_info = dict(u_data)
+            u_info.pop('password', None)  # Strictly strip passwords from API responses
+            sanitized_users[un] = u_info
+            
+        return jsonify({
+            "pricePacks": STATE.get("pricePacks", []),
+            "announcement": STATE.get("announcement", ""),
+            "maintenance": STATE.get("maintenance", False),
+            "siteLogo": STATE.get("siteLogo", "⚡"),
+            "users": sanitized_users,
+            "orders": STATE.get("orders", []),
+            "bots": STATE.get("bots", {}),
+            "coupons": STATE.get("coupons", {}),
+            "redeemedBy": STATE.get("redeemedBy", {})
+        })
+    else:
+        # Regular logged-in user: return public state + their own profile (sans password) + their own orders + their own bots
+        user_info = dict(user)
+        user_info.pop('password', None)  # Strictly strip user's password from response
+        
+        my_orders = [o for o in STATE.get("orders", []) if o.get("username") == username]
+        my_bots = {bid: b for bid, b in STATE.get("bots", {}).items() if b.get("owner") == username}
+        
+        return jsonify({
+            "pricePacks": STATE.get("pricePacks", []),
+            "announcement": STATE.get("announcement", ""),
+            "maintenance": STATE.get("maintenance", False),
+            "siteLogo": STATE.get("siteLogo", "⚡"),
+            "users": {
+                username: user_info
+            },
+            "orders": my_orders,
+            "bots": my_bots,
+            "coupons": {},
+            "redeemedBy": {}
+        })
 
 
 @app.route('/api/register', methods=['POST'])
@@ -405,14 +475,40 @@ def register():
 
     return jsonify({"success": True, "message": "Account created successfully"})
 
+FAILED_LOGINS = {}
+
 @app.route('/api/login', methods=['POST'])
 def login():
     data = request.json
     username = data.get('username')
     password = data.get('password')
+    
+    if not username or not password:
+        return jsonify({"error": "Missing fields"}), 400
+        
+    now = time.time()
+    lock_info = FAILED_LOGINS.get(username)
+    if lock_info and lock_info["count"] >= 5:
+        if now < lock_info["lock_until"]:
+            remaining = int(lock_info["lock_until"] - now)
+            return jsonify({"error": f"Too many failed attempts. Try again in {remaining} seconds."}), 429
+        else:
+            FAILED_LOGINS[username] = {"count": 0, "lock_until": 0}
+            
     user = STATE['users'].get(username)
     if not user or user['password'] != password:
+        if username not in FAILED_LOGINS:
+            FAILED_LOGINS[username] = {"count": 0, "lock_until": 0}
+        FAILED_LOGINS[username]["count"] += 1
+        if FAILED_LOGINS[username]["count"] >= 5:
+            FAILED_LOGINS[username]["lock_until"] = now + 300  # Lock for 5 minutes
+            return jsonify({"error": "Too many failed attempts. Account locked for 5 minutes."}), 429
+            
         return jsonify({"error": "Invalid credentials"}), 401
+        
+    if username in FAILED_LOGINS:
+        del FAILED_LOGINS[username]
+        
     if user['banned']:
         return jsonify({"error": "Account banned"}), 403
     session['username'] = username
@@ -529,8 +625,8 @@ def save_state():
                             incoming_bot['maxMembers'] = res.get('total_members', incoming_bot.get('maxMembers', 25))
                             print(f"Newly approved bot {bid} immediately updated from API. initialGlory={current_glory}")
 
-        # Admin or staff can modify all allowed keys, including 'users'
-        allowed_keys = ['users', 'orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
+        # Admin or staff can modify all allowed keys, excluding 'users' (modified via specific routes)
+        allowed_keys = ['orders', 'bots', 'coupons', 'redeemedBy', 'pricePacks', 'announcement', 'maintenance', 'siteLogo']
         for key in allowed_keys:
             if key in data:
                 STATE[key] = data[key]
