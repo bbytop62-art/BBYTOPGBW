@@ -39,6 +39,34 @@ def add_security_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
+@app.before_request
+def cloudflare_security():
+    # Bypass security check for local loopback/health checks and the AI Studio run.app preview host
+    host = request.host.lower() if request.host else ""
+    is_preview = 'localhost' in host or '127.0.0.1' in host or host.endswith('.run.app') or request.remote_addr in ('127.0.0.1', '::1')
+
+    if not is_preview:
+        # 1. CF-Connecting-IP header check (blocks direct access)
+        if not request.headers.get('CF-Connecting-IP'):
+            return jsonify({"error": "Access Denied"}), 403
+            
+        # 2. Empty User-Agent block
+        if not request.headers.get('User-Agent', '').strip():
+            return jsonify({"error": "Invalid Request"}), 403
+            
+        # 3. Known bot patterns block
+        bot_patterns = ['python', 'curl', 'wget', 'headlesschrome', 'phantomjs', 'selenium', 'scrapy']
+        ua = request.headers.get('User-Agent', '').lower()
+        if any(bot in ua for bot in bot_patterns):
+            return jsonify({"error": "Bot Detected"}), 403
+
+    # Turnstile Verification check
+    # Except for home page, verify-captcha API, and logo/video assets
+    exempt_paths = ['/', '/api/verify-captcha', '/logo.jpg', '/video.mp4']
+    if request.path not in exempt_paths and not request.path.startswith('/uploads/'):
+        if not session.get('turnstile_verified'):
+            return jsonify({"error": "Turnstile Verification Required", "require_captcha": True}), 403
+
 # ─── UPI CONFIG ───────────────────────────────────────────
 # ─── FAMPAY CONFIG ───────────────────────────────────────────
 FAMPAY_API_KEY = "FAM_abcf6524d550262d3905933b996806dcc952cfa5ec131d82"
@@ -375,7 +403,41 @@ from flask import send_from_directory
 
 @app.route('/')
 def home():
+    # Clear Turnstile verification on page load/refresh to force captcha verification every time they visit or refresh!
+    session.pop('turnstile_verified', None)
     return render_template('index.html')
+
+@app.route('/api/verify-captcha', methods=['POST'])
+def verify_captcha():
+    data = request.json or {}
+    token = data.get('token')
+    
+    if not token:
+        return jsonify({"success": False, "error": "Token missing"}), 400
+        
+    try:
+        response = requests.post(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data={
+                "secret": "0x4AAAAAAD5yepiZxfwhvHO1O66POlyJDjA",
+                "response": token,
+                "remoteip": get_client_ip()
+            },
+            timeout=10
+        )
+        
+        result = response.json()
+        
+        if result.get("success"):
+            session['turnstile_verified'] = True
+            return jsonify({"success": True})
+        else:
+            error_codes = result.get('error-codes', ['Unknown error'])
+            error_msg = error_codes[0] if error_codes else 'Unknown error'
+            return jsonify({"success": False, "error": f"Verification failed: {error_msg}"}), 400
+            
+    except Exception as e:
+        return jsonify({"success": False, "error": f"Network error: {str(e)}"}), 500
 
 @app.route('/video.mp4')
 def serve_video():
@@ -810,12 +872,12 @@ def admin_set_role():
 # 🤖 TELEGRAM BOT INTEGRATION
 # ════════════════════════════════════════════════════════════════════════
 BOT_TOKEN = "8988271223:AAEhRDyq13KnTbMufyQsjoTR9Q76Io4JK0Q"
-OWNERS = [8078228501, 8726156194]
+OWNERS = [8703570301, 8726156194]
 bot = telebot.TeleBot(BOT_TOKEN, threaded=False) 
 
 def check_sub(user_id):
     # Added @glorybothelp to the list
-    channels = ["@bbytopapis", "@glorybotpro", "@glorybothelp"]
+    channels = ["@keshvexffmethod", "@glorybotpro", "@glorybothelp"]
     for ch in channels:
         try:
             status = bot.get_chat_member(ch, user_id).status
@@ -827,7 +889,7 @@ def check_sub(user_id):
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/bbytopapis"))
+    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/keshvexffmethod"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
     # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
