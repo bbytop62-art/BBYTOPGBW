@@ -39,33 +39,56 @@ def add_security_headers(response):
     response.headers['X-XSS-Protection'] = '1; mode=block'
     return response
 
+DYNAMIC_PUBLIC_URL = None
+
 @app.before_request
-def cloudflare_security():
-    # Bypass security check for local loopback/health checks and the AI Studio run.app preview host
-    host = request.host.lower() if request.host else ""
-    is_preview = 'localhost' in host or '127.0.0.1' in host or host.endswith('.run.app') or request.remote_addr in ('127.0.0.1', '::1')
+def capture_public_url():
+    global DYNAMIC_PUBLIC_URL
+    if DYNAMIC_PUBLIC_URL is None and request.host:
+        host = request.host.lower()
+        if 'localhost' not in host and '127.0.0.1' not in host:
+            DYNAMIC_PUBLIC_URL = request.url_root
+            print(f"[Uptime] Captured dynamic public URL: {DYNAMIC_PUBLIC_URL}", flush=True)
 
-    if not is_preview:
-        # 1. CF-Connecting-IP header check (blocks direct access)
-        if not request.headers.get('CF-Connecting-IP'):
-            return jsonify({"error": "Access Denied"}), 403
-            
-        # 2. Empty User-Agent block
-        if not request.headers.get('User-Agent', '').strip():
-            return jsonify({"error": "Invalid Request"}), 403
-            
-        # 3. Known bot patterns block
-        bot_patterns = ['python', 'curl', 'wget', 'headlesschrome', 'phantomjs', 'selenium', 'scrapy']
-        ua = request.headers.get('User-Agent', '').lower()
-        if any(bot in ua for bot in bot_patterns):
-            return jsonify({"error": "Bot Detected"}), 403
+# Render 24/7 Keep-Alive Background Thread
+def keep_awake_pinger():
+    # Wait for the server to boot up
+    time.sleep(15)
+    print("[Uptime] Render 24/7 Keep-Alive Background Thread Active.", flush=True)
+    
+    urls_to_ping = []
+    render_url = os.environ.get('RENDER_EXTERNAL_URL')
+    if render_url:
+        if not render_url.endswith('/'):
+            render_url += '/'
+        urls_to_ping.append(render_url + "api/ping")
+        print(f"[Uptime] Registered Render URL from Env: {render_url}", flush=True)
+        
+    urls_to_ping.append("http://127.0.0.1:3000/api/ping")
+    
+    while True:
+        current_pings = list(urls_to_ping)
+        global DYNAMIC_PUBLIC_URL
+        if DYNAMIC_PUBLIC_URL:
+            dyn_ping = DYNAMIC_PUBLIC_URL + "api/ping"
+            if dyn_ping not in current_pings:
+                current_pings.insert(0, dyn_ping)
+                
+        for url in current_pings:
+            try:
+                headers = {"User-Agent": "Render-Uptime-Pinger/1.0"}
+                r = requests.get(url, headers=headers, timeout=10)
+                print(f"[Uptime] Pinged {url} -> Status: {r.status_code}", flush=True)
+            except Exception as e:
+                pass
+        
+        # Sleep for 5 minutes (300 seconds) to prevent service sleep
+        time.sleep(300)
 
-    # Turnstile Verification check
-    # Except for home page, verify-captcha API, and logo/video assets
-    exempt_paths = ['/', '/api/verify-captcha', '/logo.jpg', '/video.mp4']
-    if request.path not in exempt_paths and not request.path.startswith('/uploads/'):
-        if not session.get('turnstile_verified'):
-            return jsonify({"error": "Turnstile Verification Required", "require_captcha": True}), 403
+# Start background thread
+pinger_thread = threading.Thread(target=keep_awake_pinger)
+pinger_thread.daemon = True
+pinger_thread.start()
 
 # ─── UPI CONFIG ───────────────────────────────────────────
 # ─── FAMPAY CONFIG ───────────────────────────────────────────
@@ -403,41 +426,11 @@ from flask import send_from_directory
 
 @app.route('/')
 def home():
-    # Clear Turnstile verification on page load/refresh to force captcha verification every time they visit or refresh!
-    session.pop('turnstile_verified', None)
     return render_template('index.html')
 
-@app.route('/api/verify-captcha', methods=['POST'])
-def verify_captcha():
-    data = request.json or {}
-    token = data.get('token')
-    
-    if not token:
-        return jsonify({"success": False, "error": "Token missing"}), 400
-        
-    try:
-        response = requests.post(
-            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-            data={
-                "secret": "0x4AAAAAAD5yepiZxfwhvHO1O66POlyJDjA",
-                "response": token,
-                "remoteip": get_client_ip()
-            },
-            timeout=10
-        )
-        
-        result = response.json()
-        
-        if result.get("success"):
-            session['turnstile_verified'] = True
-            return jsonify({"success": True})
-        else:
-            error_codes = result.get('error-codes', ['Unknown error'])
-            error_msg = error_codes[0] if error_codes else 'Unknown error'
-            return jsonify({"success": False, "error": f"Verification failed: {error_msg}"}), 400
-            
-    except Exception as e:
-        return jsonify({"success": False, "error": f"Network error: {str(e)}"}), 500
+@app.route('/api/ping')
+def ping():
+    return jsonify({"status": "alive", "timestamp": datetime.now().isoformat()}), 200
 
 @app.route('/video.mp4')
 def serve_video():
