@@ -889,7 +889,7 @@ def check_sub(user_id):
 
 def sub_markup():
     markup = InlineKeyboardMarkup()
-    markup.add(InlineKeyboardButton("Join Channel 1", url="bbytopapis"))
+    markup.add(InlineKeyboardButton("Join Channel 1", url="https://t.me/bbytopapis"))
     markup.add(InlineKeyboardButton("Join Channel 2", url="https://t.me/glorybotpro"))
     # Added the 3rd channel button
     markup.add(InlineKeyboardButton("Join Channel 3", url="https://t.me/glorybothelp"))
