@@ -22,6 +22,23 @@ app.secret_key = "ydv-glory-simple-key"   # No encryption, just session
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
+def get_client_ip():
+    if 'CF-Connecting-IP' in request.headers:
+        return request.headers['CF-Connecting-IP']
+    if 'X-Forwarded-For' in request.headers:
+        return request.headers['X-Forwarded-For'].split(',')[0].strip()
+    return request.remote_addr
+
+def get_client_country():
+    return request.headers.get('CF-IPCountry', 'Unknown')
+
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    return response
+
 # ─── UPI CONFIG ───────────────────────────────────────────
 # ─── FAMPAY CONFIG ───────────────────────────────────────────
 FAMPAY_API_KEY = "FAM_abcf6524d550262d3905933b996806dcc952cfa5ec131d82"
@@ -458,7 +475,12 @@ def register():
         "email": email,
         "credits": 0,
         "role": "user",
-        "banned": False
+        "banned": False,
+        "registration_ip": get_client_ip(),
+        "registration_country": get_client_country(),
+        "last_login_ip": get_client_ip(),
+        "last_login_country": get_client_country(),
+        "last_active": datetime.now().isoformat()
     }
     save_state_to_file()
 
@@ -512,6 +534,13 @@ def login():
     if user['banned']:
         return jsonify({"error": "Account banned"}), 403
     session['username'] = username
+    
+    # Update IP log and active timestamp
+    user['last_login_ip'] = get_client_ip()
+    user['last_login_country'] = get_client_country()
+    user['last_active'] = datetime.now().isoformat()
+    save_state_to_file()
+    
     return jsonify({"success": True, "role": user['role']})
 
 @app.route('/api/logout', methods=['POST'])
@@ -556,6 +585,25 @@ def current_user():
                 "credits": user.get("credits", 0)
             })
     return jsonify({"error": "Not logged in"}), 401
+
+@app.route('/api/security-status', methods=['GET'])
+@login_required
+def security_status():
+    current_username = session['username']
+    user = STATE['users'].get(current_username)
+    if not user or user.get('role') not in ('admin', 'staff'):
+        return jsonify({"error": "Forbidden"}), 403
+        
+    is_cf = 'CF-Connecting-IP' in request.headers
+    return jsonify({
+        "success": True,
+        "is_cloudflare": is_cf,
+        "ip": request.headers.get('CF-Connecting-IP', request.remote_addr),
+        "country": request.headers.get('CF-IPCountry', 'Unknown'),
+        "ray_id": request.headers.get('CF-RAY', 'N/A'),
+        "protocol": request.headers.get('X-Forwarded-Proto', 'http'),
+        "user_agent": request.headers.get('User-Agent', '')
+    })
 
 
 
